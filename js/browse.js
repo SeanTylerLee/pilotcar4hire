@@ -71,15 +71,19 @@ runWhenReady(async () => {
 
     const svgText = await res.text();
     const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
-    const svg = doc.documentElement;
+    const parseError = doc.querySelector('parsererror');
+    if (parseError) {
+      throw new Error(parseError.textContent?.trim() || 'Map file is invalid.');
+    }
 
-    if (svg.querySelector('parsererror')) {
+    const svg = doc.documentElement;
+    if (svg.localName !== 'svg') {
       throw new Error('Map file is invalid.');
     }
 
     svg.classList.add('us-map');
     mapContainer.innerHTML = '';
-    mapContainer.appendChild(svg);
+    mapContainer.appendChild(document.importNode(svg, true));
 
     bindMapPaths();
     updateMapHighlights();

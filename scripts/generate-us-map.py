@@ -94,6 +94,7 @@ def main():
     lines.append('  <g id="hawaii" transform="translate(280, 500) scale(0.9)">')
     for abbr, name, d in hawaii:
         lines.append(f'    <path id="state-{abbr}" class="state" data-state="{abbr}" data-name="{name}" d="{d}"/>')
+    lines.append('  </g>')
     lines.append('</svg>')
 
     OUT_PATH.write_text("\n".join(lines) + "\n")

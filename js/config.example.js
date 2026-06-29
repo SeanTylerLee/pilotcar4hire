@@ -1,3 +1,6 @@
+// Bump when shipping frontend changes (shown on index page).
+window.SITE_VERSION = 'v2';
+
 // Set to true while building the frontend (no Supabase required).
 // Set to false when Supabase is configured and ready.
 window.DEV_MODE = true;
