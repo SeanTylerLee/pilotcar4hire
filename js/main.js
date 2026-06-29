@@ -1,10 +1,4 @@
 runWhenReady(() => {
-  const versionEl = document.getElementById('site-version');
-  if (versionEl && window.SITE_VERSION) {
-    versionEl.textContent = window.SITE_VERSION;
-    versionEl.hidden = false;
-  }
-
   initNav('index');
 
   const loginForm = document.getElementById('login-form');
