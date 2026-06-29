@@ -2,26 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#152238">
   <meta name="description" content="Create and manage your pilot car listing on Pilot Car 4 Hire.">
   <title>My Listing | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=21">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
   <header class="header">
     <a href="index.html" class="logo">
       <img src="images/logo.svg" alt="Pilot Car 4 Hire" class="logo-img">
     </a>
-    <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-    <nav class="nav-panel" hidden></nav>
   </header>
 
-  <main class="main page">
+  <main class="main page" id="main-content">
     <div class="page-inner page-inner-listing">
       <div class="dev-banner panel" id="dev-banner" hidden>
         <p><strong>Dev mode</strong> — Listing saves to your browser for testing. No login required.</p>
@@ -32,6 +28,17 @@
         <h1 class="page-title">My listing</h1>
         <p class="page-subtitle">This is what carriers see when they search your state. Edit the form below to update it.</p>
       </div>
+
+      <section class="listing-completion panel" id="listing-completion">
+        <div class="completion-head">
+          <span class="completion-label">Listing completeness</span>
+          <strong class="completion-pct" data-completion-pct>0%</strong>
+        </div>
+        <div class="completion-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0% complete" data-completion-bar>
+          <div class="completion-fill" data-completion-fill></div>
+        </div>
+        <ul class="completion-tips" data-completion-tips></ul>
+      </section>
 
       <section class="listing-live-section" id="listing-live-section" hidden>
         <div class="listing-live-header">
@@ -118,7 +125,8 @@
       </div>
       <nav class="footer-nav">
         <a href="index.html#map">Find pilot cars</a>
-        <a href="pilot-car.html">My listing</a>
+        <a href="pilot-cars.html">Browse by state</a>
+        <a href="signup.html">List your service</a>
         <a href="account.html">Account</a>
       </nav>
     </div>
@@ -127,15 +135,17 @@
     </div>
   </footer>
 
-  <script src="js/config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/states.js"></script>
-  <script src="js/services.js"></script>
-  <script src="js/listing-ui.js"></script>
-  <script src="js/menu.js"></script>
-  <script src="js/pilot-car.js"></script>
+  <script src="js/config.js?v=18"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
+  <script src="js/supabase-client.js?v=18"></script>
+  <script src="js/storage.js?v=18"></script>
+  <script src="js/auth.js?v=18"></script>
+  <script src="js/states.js?v=18"></script>
+  <script src="js/services.js?v=18"></script>
+  <script src="js/report-listing.js?v=18"></script>
+  <script src="js/listing-completion.js?v=18"></script>
+  <script src="js/listing-ui.js?v=18"></script>
+  <script src="js/menu.js?v=18"></script>
+  <script src="js/pilot-car.js?v=18"></script>
 </body>
 </html>

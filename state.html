@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#152238">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PC4H">
-  <meta name="description" content="Pilot Car 4 Hire — find certified pilot car escorts for oversized loads. List your services or search by state.">
-  <title>Pilot Car 4 Hire | Oversize Load Escorts</title>
+  <meta name="description" content="Find certified pilot car escorts by state. Browse lead, chase, hi-pole, and route survey services — contact drivers directly.">
+  <title>Pilot Cars by State | Pilot Car 4 Hire</title>
   <link rel="stylesheet" href="css/styles.css?v=21">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -24,18 +24,9 @@
 
   <main class="main main--home" id="main-content">
     <section class="hero hero--map-focus" id="hero-section">
-      <p class="hero-eyebrow">Nationwide directory</p>
-      <h1 class="hero-title">Find <span class="hero-accent">pilot cars</span></h1>
-      <p class="hero-lead">Tap a state or green dot on the map. Browse free — no account needed.</p>
-    </section>
-
-    <section class="welcome panel" id="welcome-section" hidden>
-      <h2 class="auth-title">Welcome back, <span id="welcome-name"></span></h2>
-      <p class="auth-subtitle" id="welcome-role"></p>
-      <div class="hero-actions">
-        <a href="#" class="btn-submit" id="welcome-primary">My listing</a>
-        <a href="account.html" class="btn-secondary">Account</a>
-      </div>
+      <p class="hero-eyebrow">State directory</p>
+      <h1 class="hero-title" id="hero-title">Pilot cars</h1>
+      <p class="hero-lead" id="hero-lead">Browse escorts based in this state.</p>
     </section>
 
     <div class="home-browse page-inner-wide" id="map">
@@ -60,7 +51,7 @@
             </div>
           </div>
           <p class="map-error" id="map-error" hidden></p>
-          <p class="map-hint"><span class="map-hint-desktop">Scroll or pinch to zoom, drag to pan. </span><span class="map-hint-mobile">Pinch to zoom, drag to move. </span>Tap a dot for details or a state to browse listings.</p>
+          <p class="map-hint"><span class="map-hint-desktop">Scroll or pinch to zoom, drag to pan. </span><span class="map-hint-mobile">Pinch to zoom, drag to move. </span>Tap a dot for details.</p>
           <p class="map-legend" id="map-legend"><span class="map-legend-dot"></span> <span id="map-legend-text">Loading pilot cars…</span></p>
         </div>
 
@@ -70,11 +61,11 @@
         </section>
       </section>
 
-      <section class="listings-view" id="listings-view" hidden>
-        <button type="button" class="back-link" id="back-to-map">&larr; Back to map</button>
+      <section class="listings-view" id="listings-view">
+        <button type="button" class="back-link" id="back-to-map">&larr; All states</button>
 
         <div class="listings-head" id="listings-head">
-          <h2 class="page-title" id="browse-title">Find a pilot car</h2>
+          <h2 class="page-title" id="browse-title">Listings</h2>
           <p class="page-subtitle" id="browse-subtitle"></p>
         </div>
 
@@ -95,7 +86,7 @@
         <div class="listings" id="listings"></div>
         <div class="empty-state" id="empty-state" hidden>
           <p class="empty-state-title">No pilot cars in this state yet</p>
-          <p class="empty-state-text">Try another state, or check back as more drivers list their services.</p>
+          <p class="empty-state-text">Check back as more drivers list their services, or browse <a href="pilot-cars.html">other states</a>.</p>
         </div>
       </section>
     </div>
@@ -104,7 +95,7 @@
       <div class="driver-cta-inner">
         <p class="eyebrow">For pilot car drivers</p>
         <h2 class="driver-cta-title">List your service — free</h2>
-        <p class="driver-cta-lead">Sign up in under two minutes. No fees, no credit card. Add your escort types, certified states, and contact info — then appear on the map for carriers to find you.</p>
+        <p class="driver-cta-lead">Sign up in under two minutes. No fees, no credit card. Appear on the map for carriers to find you.</p>
         <ul class="driver-cta-perks">
           <li>Free to join and list</li>
           <li>Quick setup — name, email, password</li>
@@ -159,6 +150,5 @@
   <script src="js/menu.js?v=21"></script>
   <script src="js/browse.js?v=21"></script>
   <script src="js/install-prompt.js?v=21"></script>
-  <script src="js/main.js?v=21"></script>
 </body>
 </html>

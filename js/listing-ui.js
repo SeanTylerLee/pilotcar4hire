@@ -40,8 +40,12 @@ function listingCardHtml(listing, { showContact = true } = {}) {
 }
 
 function renderListingCard(listing, options = {}) {
+  const { showContact = true, showReport = showContact } = options;
   const card = document.createElement('article');
   card.className = 'listing-card panel';
-  card.innerHTML = listingCardHtml(listing, options);
+  card.innerHTML = listingCardHtml(listing, { showContact });
+  if (showReport && typeof attachReportListingButton === 'function') {
+    attachReportListingButton(card, listing);
+  }
   return card;
 }

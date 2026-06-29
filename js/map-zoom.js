@@ -3,7 +3,8 @@ function initMapZoom({ container, svg, onTransform }) {
 
   const base = { x: 0, y: 0, w: 960, h: 600 };
   const aspect = base.h / base.w;
-  const minWidth = 160;
+  // Smaller minWidth = deeper zoom (~44× at 22 vs ~6× at 160). Helps small states (RI, DE, DC).
+  const minWidth = 22;
   const maxWidth = 960;
 
   const viewBox = { ...base };
@@ -56,19 +57,23 @@ function initMapZoom({ container, svg, onTransform }) {
     applyViewBox();
   }
 
-  function zoomIn() {
+  function zoomIn(clientX, clientY) {
     const rect = svg.getBoundingClientRect();
-    zoomAt(0.8, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    zoomAt(0.75, clientX ?? rect.left + rect.width / 2, clientY ?? rect.top + rect.height / 2);
   }
 
-  function zoomOut() {
+  function zoomOut(clientX, clientY) {
     const rect = svg.getBoundingClientRect();
-    zoomAt(1.25, rect.left + rect.width / 2, rect.top + rect.height / 2);
+    zoomAt(1.33, clientX ?? rect.left + rect.width / 2, clientY ?? rect.top + rect.height / 2);
+  }
+
+  function isInteractionLocked() {
+    return container.classList.contains('is-loading');
   }
 
   function isBlockedTarget(target) {
     return Boolean(target?.closest?.(
-      '.map-pin, .map-zoom-controls, .map-listing-popup, .map-popup-close, button, a',
+      '.map-pin, .map-zoom-controls, button, a',
     ));
   }
 
@@ -86,12 +91,14 @@ function initMapZoom({ container, svg, onTransform }) {
   }
 
   function onWheel(event) {
+    if (isInteractionLocked()) return;
     event.preventDefault();
-    const factor = event.deltaY < 0 ? 0.85 : 1.18;
+    const factor = event.deltaY < 0 ? 0.82 : 1.22;
     zoomAt(factor, event.clientX, event.clientY);
   }
 
   function onPointerDown(event) {
+    if (isInteractionLocked()) return;
     if (pinchStart) return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     if (isBlockedTarget(event.target)) return;
@@ -152,6 +159,7 @@ function initMapZoom({ container, svg, onTransform }) {
   }
 
   function onTouchStart(event) {
+    if (isInteractionLocked()) return;
     if (event.touches.length === 2) {
       event.preventDefault();
       pinchStart = {
@@ -167,6 +175,7 @@ function initMapZoom({ container, svg, onTransform }) {
   }
 
   function onTouchMove(event) {
+    if (isInteractionLocked()) return;
     if (!pinchStart || event.touches.length !== 2) return;
     event.preventDefault();
 
@@ -205,26 +214,52 @@ function initMapZoom({ container, svg, onTransform }) {
   const zoomOutBtn = document.getElementById('map-zoom-out');
   const resetBtn = document.getElementById('map-zoom-reset');
 
-  if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
-  if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
-  if (resetBtn) resetBtn.addEventListener('click', reset);
+  if (zoomInBtn) zoomInBtn.addEventListener('click', () => { if (!isInteractionLocked()) zoomIn(); });
+  if (zoomOutBtn) zoomOutBtn.addEventListener('click', () => { if (!isInteractionLocked()) zoomOut(); });
+  if (resetBtn) resetBtn.addEventListener('click', () => { if (!isInteractionLocked()) reset(); });
 
   applyViewBox();
+
+  function zoomToPoint(x, y, targetWidth = 42) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    viewBox.w = Math.max(minWidth, Math.min(maxWidth, targetWidth));
+    viewBox.h = viewBox.w * aspect;
+    viewBox.x = x - viewBox.w / 2;
+    viewBox.y = y - viewBox.h / 2;
+    applyViewBox();
+  }
+
+  function zoomToBounds(minX, minY, maxX, maxY, padding = 1.35) {
+    const width = (maxX - minX) * padding;
+    const height = (maxY - minY) * padding;
+    const targetW = Math.max(width, height / aspect);
+    viewBox.w = Math.max(minWidth, Math.min(maxWidth, targetW));
+    viewBox.h = viewBox.w * aspect;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    viewBox.x = cx - viewBox.w / 2;
+    viewBox.y = cy - viewBox.h / 2;
+    applyViewBox();
+  }
 
   return {
     reset,
     zoomIn,
     zoomOut,
+    getViewBoxWidth: () => viewBox.w,
+    zoomToPoint,
+    zoomToBounds,
     zoomToState(svgEl, stateCode) {
       const path = svgEl?.querySelector(`#state-${stateCode?.toUpperCase()}`);
       if (!path) return;
       try {
         const box = path.getBBox();
-        const pad = Math.max(box.width, box.height) * 0.35;
-        viewBox.x = Math.max(base.x, box.x - pad);
-        viewBox.y = Math.max(base.y, box.y - pad);
-        viewBox.w = Math.min(maxWidth, box.width + pad * 2);
+        const pad = Math.max(box.width, box.height) * 0.28;
+        const targetW = box.width + pad * 2;
+        viewBox.w = Math.min(maxWidth, Math.max(minWidth, targetW));
         viewBox.h = viewBox.w * aspect;
+        viewBox.x = box.x + box.width / 2 - viewBox.w / 2;
+        viewBox.y = box.y + box.height / 2 - viewBox.h / 2;
         applyViewBox();
       } catch {
         /* ignore */

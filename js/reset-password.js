@@ -1,8 +1,16 @@
 runWhenReady(async () => {
-  initNav('account');
+  initNav('login');
 
   const form = document.getElementById('reset-form');
   const message = document.getElementById('reset-message');
+
+  if (useLocalDev()) {
+    message.hidden = false;
+    message.classList.add('is-error');
+    message.textContent = 'Password reset requires Supabase. Disable DEV_MODE in config.js to use this feature.';
+    form.hidden = true;
+    return;
+  }
 
   await initAuth();
   const { data: { session } } = await supabase.auth.getSession();
@@ -39,7 +47,7 @@ runWhenReady(async () => {
       message.classList.remove('is-error');
       message.classList.add('is-success');
       message.textContent = 'Password updated. Redirecting to log in…';
-      setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      setTimeout(() => { window.location.href = 'login.html'; }, 1500);
     } catch (err) {
       message.hidden = false;
       message.classList.add('is-error');

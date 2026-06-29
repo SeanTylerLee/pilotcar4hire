@@ -5,6 +5,22 @@ const MAP_PROJECTION = {
 };
 
 const GEOCODE_CACHE_KEY = 'pc4h_geocode_v1';
+const PIN_FILL = '#0d7a4e';
+const PIN_FILL_APPROX = '#3d9e6a';
+const CLUSTER_MIN_TOTAL = 12;
+const CLUSTER_ZOOM_WIDTH = 130;
+
+let pinRegistry = [];
+let geocodeChain = Promise.resolve();
+const GEOCODE_DELAY_MS = 1100;
+
+function scheduleGeocode(task) {
+  geocodeChain = geocodeChain
+    .then(() => task())
+    .then(() => new Promise((resolve) => { window.setTimeout(resolve, GEOCODE_DELAY_MS); }))
+    .catch(() => undefined);
+  return geocodeChain;
+}
 
 function readGeocodeCache() {
   try {
@@ -18,7 +34,7 @@ function writeGeocodeCache(cache) {
   try {
     sessionStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(cache));
   } catch {
-    /* ignore quota errors */
+    /* ignore */
   }
 }
 
@@ -29,6 +45,22 @@ function hashString(str) {
     hash |= 0;
   }
   return Math.abs(hash);
+}
+
+function isValidCoord(coords) {
+  return coords
+    && Number.isFinite(coords.x)
+    && Number.isFinite(coords.y)
+    && coords.x >= -40
+    && coords.x <= 1000
+    && coords.y >= -40
+    && coords.y <= 640;
+}
+
+function waitForMapLayout() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
 }
 
 function projectLonLat(lon, lat, stateCode) {
@@ -53,9 +85,7 @@ function getStatePath(svg, stateCode) {
   return svg.querySelector(`#state-${stateCode.toUpperCase()}`);
 }
 
-function fallbackCoords(svg, listing, index) {
-  const data = normalizeListing(listing);
-  const stateCode = data.homeState?.toUpperCase();
+function stateCenterCoords(svg, stateCode) {
   const path = getStatePath(svg, stateCode);
   if (!path) return null;
 
@@ -65,6 +95,33 @@ function fallbackCoords(svg, listing, index) {
   } catch {
     return null;
   }
+
+  if (!bbox.width && !bbox.height) return null;
+
+  return {
+    x: bbox.x + bbox.width / 2,
+    y: bbox.y + bbox.height / 2,
+    approximate: true,
+  };
+}
+
+function fallbackCoords(svg, listing, index) {
+  const data = normalizeListing(listing);
+  const stateCode = data.homeState?.toUpperCase();
+  const path = getStatePath(svg, stateCode);
+  if (!path) return stateCenterCoords(svg, stateCode);
+
+  let bbox;
+  try {
+    bbox = path.getBBox();
+  } catch {
+    return stateCenterCoords(svg, stateCode);
+  }
+
+  if (!bbox.width && !bbox.height) {
+    return stateCenterCoords(svg, stateCode);
+  }
+
   const seed = hashString(`${data.homeCity}|${data.businessName}|${index}`);
   const angle = (seed % 360) * (Math.PI / 180);
   const radius = 6 + (seed % 5) * 3;
@@ -93,7 +150,7 @@ async function geocodeHomeCity(city, stateCode) {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     const res = await fetch(url, {
       headers: { Accept: 'application/json' },
       signal: controller.signal,
@@ -104,12 +161,11 @@ async function geocodeHomeCity(city, stateCode) {
     const results = await res.json();
     if (!results?.length) return null;
 
-    const coords = {
-      lon: Number(results[0].lon),
-      lat: Number(results[0].lat),
-      approximate: false,
-    };
+    const lon = Number(results[0].lon);
+    const lat = Number(results[0].lat);
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
 
+    const coords = { lon, lat, approximate: false };
     cache[cacheKey] = coords;
     writeGeocodeCache(cache);
     return coords;
@@ -118,16 +174,178 @@ async function geocodeHomeCity(city, stateCode) {
   }
 }
 
-async function resolvePinCoords(svg, listing, index) {
-  const data = normalizeListing(listing);
-  const geocoded = await geocodeHomeCity(data.homeCity, data.homeState);
+function setPinCoords(pin, coords) {
+  if (!pin || !isValidCoord(coords)) return false;
 
-  if (geocoded && Number.isFinite(geocoded.lon) && Number.isFinite(geocoded.lat)) {
-    const projected = projectLonLat(geocoded.lon, geocoded.lat, data.homeState);
-    return { ...projected, approximate: false };
+  pin.dataset.pinX = coords.x.toFixed(2);
+  pin.dataset.pinY = coords.y.toFixed(2);
+
+  pin.querySelectorAll('circle').forEach((circle) => {
+    circle.setAttribute('cx', coords.x.toFixed(2));
+    circle.setAttribute('cy', coords.y.toFixed(2));
+  });
+
+  const dot = pin.querySelector('.map-pin-dot');
+  if (dot) {
+    dot.setAttribute('fill', coords.approximate ? PIN_FILL_APPROX : PIN_FILL);
   }
 
-  return fallbackCoords(svg, listing, index);
+  if (coords.approximate) pin.setAttribute('class', 'map-pin is-approximate');
+  else pin.setAttribute('class', 'map-pin');
+
+  return true;
+}
+
+function getPinCoords(pin) {
+  const x = Number(pin?.dataset?.pinX);
+  const y = Number(pin?.dataset?.pinY);
+  return isValidCoord({ x, y }) ? { x, y } : null;
+}
+
+function createMapPin(listing, coords, handlers = {}) {
+  const data = normalizeListing(listing);
+  if (!isValidCoord(coords)) return null;
+
+  const pin = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  pin.setAttribute('class', coords.approximate ? 'map-pin is-approximate' : 'map-pin');
+  pin.setAttribute('role', 'button');
+  pin.setAttribute('tabindex', '0');
+  pin.dataset.state = data.homeState.toUpperCase();
+  pin.dataset.listingId = data.id || '';
+
+  const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+  title.textContent = `${data.businessName} — ${formatHomeLocation(data.homeCity, data.homeState)}`;
+  pin.appendChild(title);
+
+  const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  hit.setAttribute('class', 'map-pin-hit');
+  hit.setAttribute('r', '18');
+  hit.setAttribute('fill', 'transparent');
+  pin.appendChild(hit);
+
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('class', 'map-pin-dot');
+  dot.setAttribute('r', '7');
+  dot.setAttribute('fill', coords.approximate ? PIN_FILL_APPROX : PIN_FILL);
+  dot.setAttribute('stroke', '#ffffff');
+  dot.setAttribute('stroke-width', '2');
+  pin.appendChild(dot);
+
+  const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  ring.setAttribute('class', 'map-pin-ring');
+  ring.setAttribute('r', '12');
+  ring.setAttribute('fill', 'none');
+  ring.setAttribute('stroke', 'rgba(13, 122, 78, 0.35)');
+  ring.setAttribute('stroke-width', '2');
+  pin.appendChild(ring);
+
+  setPinCoords(pin, coords);
+
+  const activate = (event) => {
+    event.stopPropagation();
+    if (handlers.onPinActivate) handlers.onPinActivate(event, listing, pin);
+  };
+
+  pin.addEventListener('click', activate);
+  pin.addEventListener('mousedown', (event) => event.stopPropagation());
+  pin.addEventListener('pointerdown', (event) => event.stopPropagation());
+  pin.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      activate(event);
+    }
+  });
+
+  if (handlers.onPinHover) {
+    pin.addEventListener('mouseenter', (event) => handlers.onPinHover(event, listing, pin));
+    pin.addEventListener('focus', (event) => handlers.onPinHover(event, listing, pin));
+    pin.addEventListener('mouseleave', handlers.onPinLeave);
+    pin.addEventListener('blur', handlers.onPinLeave);
+  }
+
+  return pin;
+}
+
+function createClusterPin(entries, handlers = {}) {
+  const xs = entries.map((e) => e.coords.x);
+  const ys = entries.map((e) => e.coords.y);
+  const x = xs.reduce((a, b) => a + b, 0) / entries.length;
+  const y = ys.reduce((a, b) => a + b, 0) / entries.length;
+  const count = entries.length;
+
+  const pin = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  pin.setAttribute('class', 'map-pin map-pin-cluster');
+  pin.setAttribute('role', 'button');
+  pin.setAttribute('tabindex', '0');
+  pin.dataset.pinX = x.toFixed(2);
+  pin.dataset.pinY = y.toFixed(2);
+  pin.dataset.clusterCount = String(count);
+
+  const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+  title.textContent = `${count} pilot cars in this area`;
+  pin.appendChild(title);
+
+  const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  hit.setAttribute('class', 'map-pin-hit');
+  hit.setAttribute('cx', x.toFixed(2));
+  hit.setAttribute('cy', y.toFixed(2));
+  hit.setAttribute('r', '22');
+  hit.setAttribute('fill', 'transparent');
+  pin.appendChild(hit);
+
+  const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  ring.setAttribute('class', 'map-pin-cluster-bg');
+  ring.setAttribute('cx', x.toFixed(2));
+  ring.setAttribute('cy', y.toFixed(2));
+  ring.setAttribute('r', '16');
+  ring.setAttribute('fill', '#0d7a4e');
+  ring.setAttribute('stroke', '#ffffff');
+  ring.setAttribute('stroke-width', '2');
+  pin.appendChild(ring);
+
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('class', 'map-pin-cluster-label');
+  label.setAttribute('x', x.toFixed(2));
+  label.setAttribute('y', (y + 4).toFixed(2));
+  label.setAttribute('text-anchor', 'middle');
+  label.textContent = String(count);
+  pin.appendChild(label);
+
+  const activate = (event) => {
+    event.stopPropagation();
+    if (handlers.onClusterActivate) handlers.onClusterActivate(event, entries, pin);
+  };
+
+  pin.addEventListener('click', activate);
+  pin.addEventListener('pointerdown', (event) => event.stopPropagation());
+  pin.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      activate(event);
+    }
+  });
+
+  return pin;
+}
+
+async function refinePinCoords(svg, entry) {
+  const data = normalizeListing(entry.listing);
+  const geocoded = await geocodeHomeCity(data.homeCity, data.homeState);
+
+  if (geocoded) {
+    const projected = projectLonLat(geocoded.lon, geocoded.lat, data.homeState);
+    if (isValidCoord(projected)) {
+      entry.coords = { ...projected, approximate: false };
+      if (entry.pinEl) setPinCoords(entry.pinEl, entry.coords);
+      return;
+    }
+  }
+
+  const fallback = fallbackCoords(svg, entry.listing, entry.index);
+  if (fallback) {
+    entry.coords = fallback;
+    if (entry.pinEl) setPinCoords(entry.pinEl, entry.coords);
+  }
 }
 
 function ensurePinsLayer(svg) {
@@ -136,6 +354,8 @@ function ensurePinsLayer(svg) {
     layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     layer.setAttribute('class', 'map-pins');
     layer.setAttribute('aria-hidden', 'false');
+    svg.appendChild(layer);
+  } else {
     svg.appendChild(layer);
   }
   return layer;
@@ -146,81 +366,98 @@ function clearMapPins(svg) {
   if (layer) layer.textContent = '';
 }
 
-async function renderMapPins(svg, listings, handlers = {}) {
-  if (!svg) return;
+function shouldClusterPins(viewBoxWidth, visibleCount) {
+  return visibleCount >= CLUSTER_MIN_TOTAL && viewBoxWidth >= CLUSTER_ZOOM_WIDTH;
+}
 
+function clusterEntries(entries, viewBoxWidth) {
+  const cell = Math.max(28, viewBoxWidth / 10);
+  const buckets = new Map();
+
+  entries.forEach((entry) => {
+    const key = `${Math.floor(entry.coords.x / cell)}:${Math.floor(entry.coords.y / cell)}`;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(entry);
+  });
+
+  const groups = [];
+  buckets.forEach((items) => {
+    if (items.length >= 2) groups.push({ type: 'cluster', entries: items });
+    else groups.push({ type: 'pin', entry: items[0] });
+  });
+  return groups;
+}
+
+function paintMapPins(svg, entries, viewBoxWidth, handlers = {}) {
   clearMapPins(svg);
+  if (!entries.length) return 0;
+
   const layer = ensurePinsLayer(svg);
+  let painted = 0;
+  const useClusters = shouldClusterPins(viewBoxWidth, entries.length);
+  const groups = useClusters ? clusterEntries(entries, viewBoxWidth) : entries.map((entry) => ({ type: 'pin', entry }));
+
+  groups.forEach((group) => {
+    if (group.type === 'cluster') {
+      const pin = createClusterPin(group.entries, handlers);
+      if (!pin) return;
+      layer.appendChild(pin);
+      painted += 1;
+      return;
+    }
+
+    const pin = createMapPin(group.entry.listing, group.entry.coords, handlers);
+    if (!pin) return;
+    group.entry.pinEl = pin;
+    layer.appendChild(pin);
+    painted += 1;
+  });
+
+  return painted;
+}
+
+async function renderMapPins(svg, listings, handlers = {}, options = {}) {
+  if (!svg) return 0;
+
   const normalized = (listings || [])
     .map(normalizeListing)
     .filter((l) => l?.homeState && l?.homeCity?.trim());
 
-  if (!normalized.length) return;
+  pinRegistry = [];
+  clearMapPins(svg);
+  if (!normalized.length) return 0;
 
-  const coordsList = await Promise.all(
-    normalized.map((listing, index) => resolvePinCoords(svg, listing, index)),
-  );
+  await waitForMapLayout();
 
-  normalized.forEach((data, index) => {
-    const coords = coordsList[index];
-    if (!coords) return;
-
-    const pin = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    pin.setAttribute('class', 'map-pin');
-    pin.setAttribute('role', 'button');
-    pin.setAttribute('tabindex', '0');
-    pin.dataset.state = data.homeState.toUpperCase();
-    pin.dataset.listingId = data.id || '';
-    if (coords.approximate) pin.classList.add('is-approximate');
-
-    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-    title.textContent = `${data.businessName} — ${formatHomeLocation(data.homeCity, data.homeState)}`;
-    pin.appendChild(title);
-
-    const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    hit.setAttribute('class', 'map-pin-hit');
-    hit.setAttribute('cx', coords.x.toFixed(2));
-    hit.setAttribute('cy', coords.y.toFixed(2));
-    hit.setAttribute('r', '18');
-    hit.setAttribute('fill', 'transparent');
-    pin.appendChild(hit);
-
-    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    dot.setAttribute('class', 'map-pin-dot');
-    dot.setAttribute('cx', coords.x.toFixed(2));
-    dot.setAttribute('cy', coords.y.toFixed(2));
-    dot.setAttribute('r', '7');
-    pin.appendChild(dot);
-
-    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    ring.setAttribute('class', 'map-pin-ring');
-    ring.setAttribute('cx', coords.x.toFixed(2));
-    ring.setAttribute('cy', coords.y.toFixed(2));
-    ring.setAttribute('r', '12');
-    pin.appendChild(ring);
-
-    const activate = (event) => {
-      event.stopPropagation();
-      if (handlers.onPinActivate) handlers.onPinActivate(event, data, pin);
+  pinRegistry = normalized.map((data, index) => {
+    const listing = listings.find((row) => normalizeListing(row).id === data.id) || data;
+    return {
+      listing,
+      index,
+      coords: fallbackCoords(svg, listing, index),
+      pinEl: null,
     };
+  }).filter((entry) => isValidCoord(entry.coords));
 
-    pin.addEventListener('click', activate);
-    pin.addEventListener('mousedown', (event) => event.stopPropagation());
-    pin.addEventListener('pointerdown', (event) => event.stopPropagation());
-    pin.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        activate(event);
+  const viewBoxWidth = options.viewBoxWidth ?? 960;
+  const painted = paintMapPins(svg, pinRegistry, viewBoxWidth, handlers);
+
+  pinRegistry.forEach((entry) => {
+    scheduleGeocode(() => refinePinCoords(svg, entry)).then(() => {
+      if (typeof options.onCoordsRefined === 'function') {
+        options.onCoordsRefined();
       }
     });
-
-    if (handlers.onPinHover) {
-      pin.addEventListener('mouseenter', (event) => handlers.onPinHover(event, data, pin));
-      pin.addEventListener('focus', (event) => handlers.onPinHover(event, data, pin));
-      pin.addEventListener('mouseleave', handlers.onPinLeave);
-      pin.addEventListener('blur', handlers.onPinLeave);
-    }
-
-    layer.appendChild(pin);
   });
+
+  return painted;
+}
+
+function refreshMapPinDisplay(svg, viewBoxWidth, handlers = {}) {
+  if (!svg || !pinRegistry.length) return 0;
+  return paintMapPins(svg, pinRegistry, viewBoxWidth ?? 960, handlers);
+}
+
+function getPinRegistry() {
+  return pinRegistry;
 }

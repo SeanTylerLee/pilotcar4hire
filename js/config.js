@@ -1,5 +1,5 @@
 // Bump when shipping frontend changes (shown on index page).
-window.SITE_VERSION = 'v10';
+window.SITE_VERSION = 'v21';
 
 // Set to true while building the frontend (no Supabase required).
 // Set to false when Supabase is configured and ready.

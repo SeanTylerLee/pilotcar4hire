@@ -21,6 +21,7 @@ runWhenReady(async () => {
   const servicesEl = document.getElementById('services-checkboxes');
   const statesGrid = document.getElementById('states-certified-grid');
   const homeStateSelect = document.getElementById('home-state-select');
+  const completionEl = document.getElementById('listing-completion');
 
   LISTING_SERVICES.forEach((service) => {
     const label = document.createElement('label');
@@ -48,17 +49,26 @@ runWhenReady(async () => {
     message.classList.toggle('is-success', !isError);
   }
 
+  function updateCompletionMeter(listingOrNull) {
+    const completion = listingOrNull
+      ? listingCompletionFromData(listingOrNull)
+      : listingCompletionFromForm(form);
+    renderListingCompletion(completionEl, completion);
+  }
+
   function renderLiveListing(listing) {
     if (!listing) {
       liveSection.hidden = true;
       formHeading.textContent = 'Create your listing';
+      updateCompletionMeter(null);
       return;
     }
 
     liveSection.hidden = false;
     formHeading.textContent = 'Edit your listing';
     previewEl.innerHTML = '';
-    previewEl.appendChild(renderListingCard(listing, { showContact: true }));
+    previewEl.appendChild(renderListingCard(listing, { showContact: true, showReport: false }));
+    updateCompletionMeter(listing);
   }
 
   function fillForm(listing) {
@@ -103,6 +113,9 @@ runWhenReady(async () => {
     editSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     form.businessName.focus();
   });
+
+  form.addEventListener('input', () => updateCompletionMeter(null));
+  form.addEventListener('change', () => updateCompletionMeter(null));
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -151,7 +164,7 @@ runWhenReady(async () => {
   });
 
   deleteBtn.addEventListener('click', async () => {
-    if (!confirm('Remove your listing? Carriers will no longer see it.')) return;
+    if (!confirm('Remove your listing? Carriers will no longer see you on the map.')) return;
 
     try {
       await deleteListingByUserId(userId);

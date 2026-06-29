@@ -1,14 +1,41 @@
-function isHomeBrowsePage() {
+function getBrowsePageContext() {
   const path = window.location.pathname;
-  return path.endsWith('/') || path.endsWith('/index.html') || path.endsWith('index.html');
+  const isHome = path.endsWith('/') || path.endsWith('/index.html') || path.endsWith('index.html');
+  const isStatePage = /\/state\.html$/i.test(path) || path.endsWith('state.html');
+  const params = new URLSearchParams(window.location.search);
+  const queryState = params.get('state')?.toUpperCase();
+  const lockedState = isStatePage && queryState && US_STATES.includes(queryState) ? queryState : null;
+
+  return {
+    isHomeBrowsePage: isHome,
+    isStatePage,
+    lockedState,
+    browseBasePath() {
+      if (isHome) return 'index.html';
+      if (lockedState) return `state.html?state=${lockedState}`;
+      return 'index.html';
+    },
+  };
+}
+
+function isHomeBrowsePage() {
+  return getBrowsePageContext().isHomeBrowsePage;
 }
 
 function browseBasePath() {
-  return isHomeBrowsePage() ? 'index.html' : 'browse.html';
+  return getBrowsePageContext().browseBasePath();
 }
 
 runWhenReady(async () => {
-  initNav(isHomeBrowsePage() ? 'index' : 'browse');
+  const pageContext = getBrowsePageContext();
+
+  if (pageContext.isStatePage && !pageContext.lockedState) {
+    window.location.replace('pilot-cars.html');
+    return;
+  }
+
+  const navKey = pageContext.isStatePage ? 'pilot-cars' : (isHomeBrowsePage() ? 'index' : 'browse');
+  initNav(navKey);
 
   const mapView = document.getElementById('map-view');
   const listingsView = document.getElementById('listings-view');
@@ -16,9 +43,9 @@ runWhenReady(async () => {
   const mapContainer = document.getElementById('us-map-container');
   const mapError = document.getElementById('map-error');
   const mapTooltip = document.getElementById('map-tooltip');
-  const mapPopup = document.getElementById('map-listing-popup');
-  const mapPopupContent = document.getElementById('map-popup-content');
-  const mapPopupClose = document.getElementById('map-popup-close');
+  const pinDetail = document.getElementById('map-pin-detail');
+  const pinDetailContent = document.getElementById('map-pin-detail-content');
+  const pinDetailClose = document.getElementById('map-pin-detail-close');
   const backBtn = document.getElementById('back-to-map');
   const browseTitle = document.getElementById('browse-title');
   const browseSubtitle = document.getElementById('browse-subtitle');
@@ -27,6 +54,30 @@ runWhenReady(async () => {
   const resultsCount = document.getElementById('results-count');
   const searchInput = document.getElementById('search-input');
   const typeFilter = document.getElementById('type-filter');
+  const mapLegendText = document.getElementById('map-legend-text');
+  const mapLoadingOverlay = document.getElementById('map-loading-overlay');
+  const mapZoomIn = document.getElementById('map-zoom-in');
+  const mapZoomOut = document.getElementById('map-zoom-out');
+  const mapZoomReset = document.getElementById('map-zoom-reset');
+  const mapFiltersEl = document.getElementById('map-filters');
+  const heroTitle = document.getElementById('hero-title');
+  const heroLead = document.getElementById('hero-lead');
+
+  if (pageContext.isStatePage && pageContext.lockedState) {
+    const stateName = getStateName(pageContext.lockedState);
+    document.title = `Pilot Cars in ${stateName} | Pilot Car 4 Hire`;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.content = `Find certified pilot car escorts based in ${stateName}. Browse lead, chase, hi-pole, and route survey services — contact drivers directly.`;
+    }
+    if (heroTitle) heroTitle.innerHTML = `Pilot cars in <span class="hero-accent">${stateName}</span>`;
+    if (heroLead) heroLead.textContent = 'Browse escorts based in this state. Tap a dot on the map or scroll listings below.';
+    if (backBtn) {
+      backBtn.textContent = '← All states';
+      backBtn.classList.add('back-link--directory');
+    }
+    document.body.classList.add('page-state-landing');
+  }
 
   LISTING_SERVICES.forEach((service) => {
     const option = document.createElement('option');
@@ -35,14 +86,21 @@ runWhenReady(async () => {
     typeFilter.appendChild(option);
   });
 
-  let selectedState = null;
+  let selectedState = pageContext.lockedState || null;
   let allListings = [];
   let mapSvg = null;
   let mapZoom = null;
   let activePin = null;
+  let mapServiceFilter = '';
+  let pinHandlers = null;
 
   function getMapSvg() {
     return mapContainer?.querySelector('svg.us-map') || null;
+  }
+
+  function getFilteredListings(serviceCode = mapServiceFilter) {
+    if (!serviceCode) return allListings;
+    return allListings.filter((listing) => listingOffersService(listing, serviceCode));
   }
 
   function clearActivePin() {
@@ -52,15 +110,19 @@ runWhenReady(async () => {
     }
   }
 
-  function closeMapPopup() {
-    if (mapPopup) mapPopup.hidden = true;
-    if (mapPopupContent) mapPopupContent.innerHTML = '';
+  function isPinDetailOpen() {
+    return pinDetail && !pinDetail.hidden;
+  }
+
+  function closePinDetail() {
+    if (pinDetail) pinDetail.hidden = true;
+    if (pinDetailContent) pinDetailContent.innerHTML = '';
     clearActivePin();
     hideTooltip();
   }
 
-  function showMapPopup(listing, pinEl) {
-    if (!mapPopup || !mapPopupContent) return;
+  function showPinDetail(listing, pinEl) {
+    if (!pinDetail || !pinDetailContent) return;
 
     clearActivePin();
     if (pinEl) {
@@ -69,22 +131,87 @@ runWhenReady(async () => {
     }
 
     const data = normalizeListing(listing);
-    mapPopupContent.innerHTML = '';
-    mapPopupContent.appendChild(renderListingCard(listing, { showContact: true }));
+    pinDetailContent.innerHTML = '';
+    pinDetailContent.appendChild(renderListingCard(listing, { showContact: true, showReport: true }));
 
     const footer = document.createElement('p');
-    footer.className = 'map-popup-footer';
+    footer.className = 'map-pin-detail-footer';
     const stateName = getStateName(data.homeState);
-    footer.innerHTML = `<button type="button" class="map-popup-link" data-state="${data.homeState}">View all pilot cars in ${stateName} →</button>`;
-    mapPopupContent.appendChild(footer);
+    const stateHref = `state.html?state=${data.homeState}`;
+    footer.innerHTML = `<a href="${stateHref}" class="map-pin-detail-link">View all pilot cars in ${stateName} →</a>`;
+    pinDetailContent.appendChild(footer);
 
-    footer.querySelector('.map-popup-link')?.addEventListener('click', () => {
-      closeMapPopup();
-      selectState(data.homeState);
-    });
-
-    mapPopup.hidden = false;
+    pinDetail.hidden = false;
     hideTooltip();
+    pinDetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function setMapLoading(loading) {
+    if (mapStage) {
+      mapStage.classList.toggle('is-loading', loading);
+      mapStage.setAttribute('aria-busy', loading ? 'true' : 'false');
+    }
+    if (mapLoadingOverlay) {
+      mapLoadingOverlay.hidden = !loading;
+    }
+    [mapZoomIn, mapZoomOut, mapZoomReset].forEach((btn) => {
+      if (btn) btn.disabled = loading;
+    });
+  }
+
+  function updateMapLegend() {
+    if (!mapLegendText) return;
+    const listings = getFilteredListings();
+    const count = listings.length;
+    const filterLabel = mapServiceFilter ? getServiceLabel(mapServiceFilter) : null;
+    const pinLabel = count === 1 ? '1 pilot car on the map' : `${count} pilot cars on the map`;
+    if (!count) {
+      mapLegendText.textContent = filterLabel
+        ? `No pilot cars offering ${filterLabel} yet`
+        : 'No pilot cars listed yet';
+      return;
+    }
+    mapLegendText.textContent = filterLabel
+      ? `${pinLabel} (${filterLabel}) — green dot = home base`
+      : `${pinLabel} — green dot = home base`;
+  }
+
+  function buildPinHandlers() {
+    return {
+      onPinHover: showPinTooltip,
+      onPinLeave: hideTooltip,
+      onPinActivate: (event, listing, pinEl) => {
+        event.stopPropagation();
+        const coords = pinEl?.dataset?.pinX != null
+          ? { x: Number(pinEl.dataset.pinX), y: Number(pinEl.dataset.pinY) }
+          : null;
+        if (coords && mapZoom?.zoomToPoint) {
+          mapZoom.zoomToPoint(coords.x, coords.y, 42);
+        }
+        showPinDetail(listing, pinEl);
+      },
+      onClusterActivate: (event, entries, pinEl) => {
+        event.stopPropagation();
+        if (!entries?.length || !mapZoom?.zoomToBounds) return;
+        const xs = entries.map((e) => e.coords.x);
+        const ys = entries.map((e) => e.coords.y);
+        mapZoom.zoomToBounds(
+          Math.min(...xs),
+          Math.min(...ys),
+          Math.max(...xs),
+          Math.max(...ys),
+        );
+        if (typeof refreshMapPinDisplay === 'function') {
+          refreshMapPinDisplay(mapSvg, mapZoom.getViewBoxWidth(), pinHandlers);
+        }
+      },
+    };
+  }
+
+  function refreshPinsFromZoom() {
+    if (typeof refreshMapPinDisplay !== 'function' || !mapSvg) return;
+    const width = mapZoom?.getViewBoxWidth?.() ?? 960;
+    refreshMapPinDisplay(mapSvg, width, pinHandlers);
   }
 
   async function updateMapPins() {
@@ -93,30 +220,31 @@ runWhenReady(async () => {
     mapSvg = getMapSvg();
     if (!mapSvg || mapView.hidden) return;
 
+    pinHandlers = buildPinHandlers();
+    const listings = getFilteredListings();
+    const viewBoxWidth = mapZoom?.getViewBoxWidth?.() ?? 960;
+
     try {
-      await renderMapPins(mapSvg, allListings, {
-        onPinHover: showPinTooltip,
-        onPinLeave: hideTooltip,
-        onPinActivate: (event, listing, pinEl) => {
-          event.stopPropagation();
-          showMapPopup(listing, pinEl);
-        },
+      await renderMapPins(mapSvg, listings, pinHandlers, {
+        viewBoxWidth,
+        onCoordsRefined: refreshPinsFromZoom,
       });
+      updateMapLegend();
     } catch (err) {
       console.error('Map pins failed:', err);
     }
   }
 
   function showPinTooltip(event, listing) {
-    if (mapPopup && !mapPopup.hidden) return;
+    if (isPinDetailOpen()) return;
     const data = normalizeListing(listing);
     mapTooltip.textContent = `${data.businessName} — ${formatHomeLocation(data.homeCity, data.homeState)}`;
     mapTooltip.hidden = false;
     moveTooltip(event);
   }
 
-  function countListingsForState(stateCode) {
-    return allListings.filter((l) => listingMatchesState(l, stateCode)).length;
+  function countListingsForState(stateCode, serviceCode = mapServiceFilter) {
+    return getFilteredListings(serviceCode).filter((l) => listingMatchesState(l, stateCode)).length;
   }
 
   function getMapPaths() {
@@ -126,11 +254,20 @@ runWhenReady(async () => {
   function updateMapHighlights() {
     const paths = getMapPaths();
     if (!paths.length) return;
+    const filterActive = Boolean(mapServiceFilter);
+
     paths.forEach((path) => {
       const code = path.dataset.state;
-      const count = countListingsForState(code);
-      path.classList.toggle('has-listings', count > 0);
-      path.setAttribute('aria-label', `${path.dataset.name}: ${count} pilot car${count === 1 ? '' : 's'}`);
+      const totalCount = allListings.filter((l) => listingMatchesState(l, code)).length;
+      const filteredCount = countListingsForState(code);
+      path.classList.toggle('has-listings', totalCount > 0);
+      path.classList.toggle('has-filtered-listings', filteredCount > 0);
+      path.classList.toggle('is-filtered-out', filterActive && totalCount > 0 && filteredCount === 0);
+
+      const label = filterActive && mapServiceFilter
+        ? `${filteredCount} offering ${getServiceLabel(mapServiceFilter)}`
+        : (filteredCount === 1 ? '1 pilot car' : `${filteredCount} pilot cars`);
+      path.setAttribute('aria-label', `${path.dataset.name}: ${label}`);
     });
   }
 
@@ -142,13 +279,22 @@ runWhenReady(async () => {
       path.addEventListener('click', (event) => {
         if (mapZoom?.wasDragged?.()) return;
         event.stopPropagation();
-        closeMapPopup();
+        closePinDetail();
+        if (pageContext.isStatePage && pageContext.lockedState) {
+          mapZoom?.zoomToState?.(mapSvg, pageContext.lockedState);
+          listingsView?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
         selectState(path.dataset.state);
       });
       path.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          closeMapPopup();
+          closePinDetail();
+          if (pageContext.isStatePage && pageContext.lockedState) {
+            mapZoom?.zoomToState?.(mapSvg, pageContext.lockedState);
+            return;
+          }
           selectState(path.dataset.state);
         }
       });
@@ -183,12 +329,19 @@ runWhenReady(async () => {
     mapSvg = getMapSvg();
 
     if (typeof initMapZoom === 'function' && mapStage && mapSvg) {
-      mapZoom = initMapZoom({ container: mapStage, svg: mapSvg });
+      mapZoom = initMapZoom({
+        container: mapStage,
+        svg: mapSvg,
+        onTransform: () => refreshPinsFromZoom(),
+      });
     }
 
     bindMapPaths();
     updateMapHighlights();
-    void updateMapPins();
+
+    if (pageContext.lockedState && mapZoom?.zoomToState) {
+      mapZoom.zoomToState(mapSvg, pageContext.lockedState);
+    }
   }
 
   function showMapError(message) {
@@ -206,14 +359,23 @@ runWhenReady(async () => {
       allListings = [];
     }
     updateMapHighlights();
-    void updateMapPins();
+    updateMapLegend();
+    await updateMapPins();
     if (selectedState) renderListings();
   }
 
   function showTooltip(e, path) {
-    if (mapPopup && !mapPopup.hidden) return;
+    if (isPinDetailOpen()) return;
     const count = countListingsForState(path.dataset.state);
-    const label = count === 1 ? '1 pilot car' : `${count} pilot cars`;
+    const filterLabel = mapServiceFilter ? getServiceLabel(mapServiceFilter) : null;
+    let label;
+    if (mapServiceFilter) {
+      label = count === 1
+        ? `1 offering ${filterLabel}`
+        : `${count} offering ${filterLabel}`;
+    } else {
+      label = count === 1 ? '1 pilot car' : `${count} pilot cars`;
+    }
     mapTooltip.textContent = `${path.dataset.name} — ${label}`;
     mapTooltip.hidden = false;
     moveTooltip(e);
@@ -233,10 +395,55 @@ runWhenReady(async () => {
     mapTooltip.hidden = true;
   }
 
+  function setMapServiceFilter(value) {
+    mapServiceFilter = value || '';
+    if (typeFilter) typeFilter.value = mapServiceFilter;
+    if (mapFiltersEl) {
+      mapFiltersEl.querySelectorAll('.map-filter-chip').forEach((chip) => {
+        const active = chip.dataset.service === mapServiceFilter
+          || (!mapServiceFilter && chip.dataset.service === '');
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+    }
+    updateMapHighlights();
+    updateMapLegend();
+    void updateMapPins();
+    if (selectedState) renderListings();
+  }
+
+  function buildMapFilters() {
+    if (!mapFiltersEl) return;
+
+    const chips = [
+      { value: '', label: 'All services' },
+      ...LISTING_SERVICES.map((s) => ({ value: s.value, label: s.label })),
+    ];
+
+    mapFiltersEl.innerHTML = '';
+    chips.forEach((chip) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'map-filter-chip';
+      btn.dataset.service = chip.value;
+      btn.textContent = chip.label;
+      btn.setAttribute('aria-pressed', chip.value === '' ? 'true' : 'false');
+      if (chip.value === '') btn.classList.add('is-active');
+      btn.addEventListener('click', () => setMapServiceFilter(chip.value));
+      mapFiltersEl.appendChild(btn);
+    });
+  }
+
   function selectState(stateCode) {
     if (!stateCode) return;
+    if (pageContext.isStatePage && pageContext.lockedState) {
+      selectedState = pageContext.lockedState;
+      renderListings();
+      return;
+    }
+
     selectedState = stateCode.toUpperCase();
-    closeMapPopup();
+    closePinDetail();
     mapView.hidden = true;
     listingsView.hidden = false;
 
@@ -245,15 +452,20 @@ runWhenReady(async () => {
     if (browseSubtitle) browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
 
     searchInput.value = '';
-    typeFilter.value = '';
+    typeFilter.value = mapServiceFilter;
     renderListings();
     history.replaceState(null, '', `#${selectedState}`);
     listingsView.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   async function showMap() {
+    if (pageContext.isStatePage) {
+      window.location.href = 'pilot-cars.html';
+      return;
+    }
+
     selectedState = null;
-    closeMapPopup();
+    closePinDetail();
     listingsView.hidden = true;
     mapView.hidden = false;
     if (browseTitle) browseTitle.textContent = 'Find a pilot car';
@@ -261,18 +473,19 @@ runWhenReady(async () => {
     history.replaceState(null, '', browseBasePath());
     mapZoom?.reset?.();
     void updateMapPins();
+    updateMapLegend();
   }
 
   function renderListings() {
     if (!selectedState) return;
 
     const query = searchInput.value.trim().toLowerCase();
-    const type = typeFilter.value;
+    const type = typeFilter.value || mapServiceFilter;
 
-    let listings = allListings.filter((l) => listingMatchesState(l, selectedState));
+    let listings = getFilteredListings().filter((l) => listingMatchesState(l, selectedState));
 
     if (type) {
-      listings = listings.filter((l) => normalizeListing(l).services.includes(type));
+      listings = listings.filter((l) => listingOffersService(l, type));
     }
 
     if (query) {
@@ -293,9 +506,12 @@ runWhenReady(async () => {
     listingsEl.innerHTML = '';
     const count = listings.length;
     const stateName = getStateName(selectedState);
+    const filterNote = (typeFilter.value || mapServiceFilter)
+      ? ` offering ${getServiceLabel(typeFilter.value || mapServiceFilter)}`
+      : '';
     resultsCount.textContent = count === 1
-      ? `1 pilot car in ${stateName}`
-      : `${count} pilot cars in ${stateName}`;
+      ? `1 pilot car in ${stateName}${filterNote}`
+      : `${count} pilot cars in ${stateName}${filterNote}`;
 
     if (count === 0) {
       emptyState.hidden = false;
@@ -304,39 +520,66 @@ runWhenReady(async () => {
 
     emptyState.hidden = true;
     listings.forEach((listing) => {
-      listingsEl.appendChild(renderListingCard(listing));
+      listingsEl.appendChild(renderListingCard(listing, { showContact: true, showReport: true }));
     });
   }
 
-  if (mapPopupClose) mapPopupClose.addEventListener('click', closeMapPopup);
+  function initStateLandingLayout() {
+    if (!pageContext.isStatePage || !pageContext.lockedState) return;
 
-  if (mapStage) {
-    mapStage.addEventListener('click', (event) => {
-      if (event.target === mapStage || event.target === mapContainer) {
-        closeMapPopup();
-      }
-    });
+    mapView.hidden = false;
+    listingsView.hidden = false;
+
+    const name = getStateName(pageContext.lockedState);
+    if (browseTitle) browseTitle.textContent = `${name} listings`;
+    if (browseSubtitle) {
+      browseSubtitle.textContent = 'Contact pilot car escorts based in this state.';
+    }
   }
+
+  buildMapFilters();
+
+  if (pinDetailClose) pinDetailClose.addEventListener('click', closePinDetail);
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeMapPopup();
+    if (event.key === 'Escape') closePinDetail();
   });
 
-  backBtn.addEventListener('click', () => { showMap(); });
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      if (pageContext.isStatePage) {
+        window.location.href = 'pilot-cars.html';
+        return;
+      }
+      showMap();
+    });
+  }
+
   searchInput.addEventListener('input', renderListings);
-  typeFilter.addEventListener('change', renderListings);
+  typeFilter.addEventListener('change', () => {
+    setMapServiceFilter(typeFilter.value);
+  });
+
+  initStateLandingLayout();
+  setMapLoading(true);
 
   try {
     await loadMap();
+    await loadListings();
   } catch (err) {
     console.error(err);
     showMapError('Map failed to load. Refresh the page or check that images/us-map.svg is deployed.');
+  } finally {
+    setMapLoading(false);
   }
 
-  void loadListings();
-
-  const hash = window.location.hash.replace('#', '').toUpperCase();
-  if (hash && US_STATES.includes(hash) && getMapPaths().length) {
-    selectState(hash);
+  if (pageContext.lockedState) {
+    selectedState = pageContext.lockedState;
+    renderListings();
+  } else {
+    const hash = window.location.hash.replace('#', '').toUpperCase();
+    if (hash && US_STATES.includes(hash) && getMapPaths().length) {
+      selectState(hash);
+    }
   }
 });

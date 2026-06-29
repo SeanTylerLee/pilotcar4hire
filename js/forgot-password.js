@@ -1,8 +1,16 @@
 runWhenReady(() => {
-  initNav('forgot-password');
+  initNav('login');
 
   const form = document.getElementById('forgot-form');
   const message = document.getElementById('forgot-message');
+
+  if (useLocalDev()) {
+    message.hidden = false;
+    message.classList.add('is-error');
+    message.textContent = 'Password reset requires Supabase. Disable DEV_MODE in config.js to use this feature.';
+    form.hidden = true;
+    return;
+  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

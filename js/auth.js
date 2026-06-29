@@ -54,6 +54,19 @@ function runWhenReady(fn) {
 }
 
 function redirectAfterLogin() {
+  const params = new URLSearchParams(window.location.search);
+  const next = params.get('next');
+  if (next) {
+    try {
+      const url = new URL(next, window.location.origin);
+      if (url.origin === window.location.origin && !next.startsWith('//')) {
+        window.location.href = `${url.pathname}${url.search}${url.hash}`;
+        return;
+      }
+    } catch {
+      /* ignore invalid next */
+    }
+  }
   window.location.href = 'pilot-car.html';
 }
 
@@ -61,7 +74,8 @@ async function requireAuth() {
   await initAuth();
   if (useLocalDev()) return DEV_PILOT_USER;
   if (!cachedUser) {
-    window.location.href = 'signup.html';
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    window.location.href = `login.html?next=${encodeURIComponent(returnTo)}`;
     return null;
   }
   if (cachedUser.role !== 'pilot-car') {
