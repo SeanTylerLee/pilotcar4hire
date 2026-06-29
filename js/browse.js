@@ -33,6 +33,37 @@ runWhenReady(async () => {
 
   let selectedState = null;
   let allListings = [];
+  let mapSvg = null;
+
+  function getMapSvg() {
+    return mapContainer?.querySelector('svg.us-map') || null;
+  }
+
+  async function updateMapPins() {
+    if (typeof renderMapPins !== 'function') return;
+
+    mapSvg = getMapSvg();
+    if (!mapSvg || mapView.hidden) return;
+
+    try {
+      await renderMapPins(mapSvg, allListings, {
+        onPinHover: showPinTooltip,
+        onPinLeave: hideTooltip,
+        onPinActivate: (_event, listing) => {
+          selectState(listing.homeState);
+        },
+      });
+    } catch (err) {
+      console.error('Map pins failed:', err);
+    }
+  }
+
+  function showPinTooltip(event, listing) {
+    const data = normalizeListing(listing);
+    mapTooltip.textContent = `${data.businessName} — ${formatHomeLocation(data.homeCity, data.homeState)}`;
+    mapTooltip.hidden = false;
+    moveTooltip(event);
+  }
 
   function countListingsForState(stateCode) {
     return allListings.filter((l) => listingMatchesState(l, stateCode)).length;
@@ -96,6 +127,7 @@ runWhenReady(async () => {
 
     bindMapPaths();
     updateMapHighlights();
+    void updateMapPins();
   }
 
   function showMapError(message) {
@@ -113,6 +145,7 @@ runWhenReady(async () => {
       allListings = [];
     }
     updateMapHighlights();
+    void updateMapPins();
     if (selectedState) renderListings();
   }
 
@@ -126,9 +159,12 @@ runWhenReady(async () => {
 
   function moveTooltip(e) {
     const panel = mapContainer.closest('.map-panel');
+    if (!panel) return;
     const rect = panel.getBoundingClientRect();
-    mapTooltip.style.left = `${e.clientX - rect.left}px`;
-    mapTooltip.style.top = `${e.clientY - rect.top - 12}px`;
+    const x = e?.clientX ?? rect.left + rect.width / 2;
+    const y = e?.clientY ?? rect.top + rect.height / 2;
+    mapTooltip.style.left = `${x - rect.left}px`;
+    mapTooltip.style.top = `${y - rect.top - 12}px`;
   }
 
   function hideTooltip() {
@@ -152,13 +188,14 @@ runWhenReady(async () => {
     listingsView.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function showMap() {
+  async function showMap() {
     selectedState = null;
     listingsView.hidden = true;
     mapView.hidden = false;
     browseTitle.textContent = 'Find a pilot car';
     browseSubtitle.textContent = 'Select a state on the map to view pilot cars based there. No account required.';
     history.replaceState(null, '', browseBasePath());
+    await updateMapPins();
   }
 
   function renderListings() {
@@ -206,11 +243,9 @@ runWhenReady(async () => {
     });
   }
 
-  backBtn.addEventListener('click', showMap);
+  backBtn.addEventListener('click', () => { showMap(); });
   searchInput.addEventListener('input', renderListings);
   typeFilter.addEventListener('change', renderListings);
-
-  await loadListings();
 
   try {
     await loadMap();
@@ -218,6 +253,8 @@ runWhenReady(async () => {
     console.error(err);
     showMapError('Map failed to load. Refresh the page or check that images/us-map.svg is deployed.');
   }
+
+  void loadListings();
 
   const hash = window.location.hash.replace('#', '').toUpperCase();
   if (hash && US_STATES.includes(hash) && getMapPaths().length) {

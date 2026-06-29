@@ -50,7 +50,8 @@
           <div class="map-tooltip" id="map-tooltip" hidden></div>
           <div class="us-map-container" id="us-map-container" aria-label="Interactive map of the United States"></div>
           <p class="map-error" id="map-error" hidden></p>
-          <p class="map-hint">Click a state to view pilot cars based there.</p>
+          <p class="map-hint">Green dots show where each pilot car is based. Click a state or dot to view listings.</p>
+          <p class="map-legend" aria-hidden="true"><span class="map-legend-dot"></span> Pilot car home base</p>
         </div>
       </section>
 
@@ -146,7 +147,7 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=5"></script>
+  <script src="js/config.js?v=7"></script>
   <script>
     (function () {
       var el = document.getElementById('site-version');
@@ -163,8 +164,9 @@
   <script src="js/storage.js?v=5"></script>
   <script src="js/auth.js?v=5"></script>
   <script src="js/listing-ui.js?v=5"></script>
+  <script src="js/map-pins.js?v=7"></script>
   <script src="js/menu.js?v=5"></script>
-  <script src="js/browse.js?v=5"></script>
+  <script src="js/browse.js?v=7"></script>
   <script src="js/main.js?v=5"></script>
 </body>
 </html>
