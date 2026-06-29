@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pilot Car 4 Hire</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="header">
+    <a href="/" class="logo">
+      <img src="images/logo.svg" alt="Pilot Car 4 Hire" class="logo-img">
+    </a>
+    <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <main class="main">
+    <div class="auth">
+      <section class="auth-section">
+        <h1 class="auth-title">Log in</h1>
+        <form class="auth-form" id="login-form" action="#" method="post">
+          <label class="field">
+            <span class="field-label">Email</span>
+            <input type="email" name="email" required autocomplete="email">
+          </label>
+          <label class="field">
+            <span class="field-label">Password</span>
+            <input type="password" name="password" required autocomplete="current-password">
+          </label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+          <button type="submit" class="btn-submit">Log In</button>
+        </form>
+      </section>
+
+      <section class="auth-section">
+        <h2 class="auth-title">Sign up</h2>
+        <p class="auth-subtitle">Create an account and choose your role.</p>
+        <form class="auth-form" id="signup-form" action="#" method="post">
+          <fieldset class="role-fieldset">
+            <legend class="role-legend">I am a…</legend>
+            <div class="role-grid">
+              <label class="role-card">
+                <input type="radio" name="role" value="pilot-car" required>
+                <span class="role-card-title">Pilot car</span>
+                <span class="role-card-desc">List my services and get found by carriers.</span>
+              </label>
+              <label class="role-card">
+                <input type="radio" name="role" value="carrier" required>
+                <span class="role-card-title">Looking for a pilot car</span>
+                <span class="role-card-desc">Search for certified escorts for my load.</span>
+              </label>
+            </div>
+          </fieldset>
+          <label class="field">
+            <span class="field-label">Name</span>
+            <input type="text" name="name" required autocomplete="name">
+          </label>
+          <label class="field">
+            <span class="field-label">Email</span>
+            <input type="email" name="email" required autocomplete="email">
+          </label>
+          <label class="field">
+            <span class="field-label">Password</span>
+            <input type="password" name="password" required autocomplete="new-password">
+          </label>
+          <button type="submit" class="btn-submit">Sign Up</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
