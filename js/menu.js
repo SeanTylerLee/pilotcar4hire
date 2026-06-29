@@ -3,7 +3,8 @@ const NAV = `
     <li><a href="index.html" data-nav="index">Home</a></li>
     <li><a href="index.html#map" data-nav="browse">Find pilot cars</a></li>
     <li><a href="pilot-car.html" data-nav="pilot-car">My listing</a></li>
-    <li><a href="index.html#signup" data-nav="signup">Sign up</a></li>
+    <li><a href="login.html" data-nav="login">Log in</a></li>
+    <li><a href="signup.html" data-nav="signup">Sign up</a></li>
     <li><a href="account.html" data-nav="account">Account</a></li>
   </ul>
   <p class="nav-user" id="nav-user" hidden></p>

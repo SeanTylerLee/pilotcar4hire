@@ -177,18 +177,26 @@ async function renderMapPins(svg, listings, handlers = {}) {
     title.textContent = `${data.businessName} — ${formatHomeLocation(data.homeCity, data.homeState)}`;
     pin.appendChild(title);
 
+    const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    hit.setAttribute('class', 'map-pin-hit');
+    hit.setAttribute('cx', coords.x.toFixed(2));
+    hit.setAttribute('cy', coords.y.toFixed(2));
+    hit.setAttribute('r', '18');
+    hit.setAttribute('fill', 'transparent');
+    pin.appendChild(hit);
+
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('class', 'map-pin-dot');
     dot.setAttribute('cx', coords.x.toFixed(2));
     dot.setAttribute('cy', coords.y.toFixed(2));
-    dot.setAttribute('r', '6');
+    dot.setAttribute('r', '7');
     pin.appendChild(dot);
 
     const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     ring.setAttribute('class', 'map-pin-ring');
     ring.setAttribute('cx', coords.x.toFixed(2));
     ring.setAttribute('cy', coords.y.toFixed(2));
-    ring.setAttribute('r', '10');
+    ring.setAttribute('r', '12');
     pin.appendChild(ring);
 
     const activate = (event) => {

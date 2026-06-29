@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forgot Password | Pilot Car 4 Hire</title>
+  <title>Sign Up Free | Pilot Car 4 Hire</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
@@ -23,19 +23,33 @@
   <main class="main page">
     <div class="page-inner">
       <div class="page-head">
-        <p class="eyebrow">Account recovery</p>
-        <h1 class="page-title">Forgot password</h1>
-        <p class="page-subtitle">Enter your email and we'll send reset instructions.</p>
+        <p class="eyebrow">Pilot car drivers</p>
+        <h1 class="page-title">Sign up free</h1>
+        <p class="page-subtitle">Create your account in under two minutes. No fees, no credit card — then add your listing and show up on the map.</p>
       </div>
 
-      <form class="auth-form panel" id="forgot-form">
+      <ul class="signup-perks panel">
+        <li><strong>Free</strong> — list your escort service at no cost</li>
+        <li><strong>Quick</strong> — name, email, and password to get started</li>
+        <li><strong>Visible</strong> — carriers find you on the homepage map</li>
+      </ul>
+
+      <form class="auth-form panel" id="signup-form">
+        <label class="field">
+          <span class="field-label">Name</span>
+          <input type="text" name="name" required autocomplete="name" placeholder="Your name or company">
+        </label>
         <label class="field">
           <span class="field-label">Email</span>
           <input type="email" name="email" required autocomplete="email" placeholder="you@company.com">
         </label>
-        <p class="form-message" id="forgot-message" hidden></p>
-        <button type="submit" class="btn-submit">Send reset link</button>
-        <a href="login.html" class="text-link">Back to log in</a>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input type="password" name="password" required autocomplete="new-password" minlength="6">
+        </label>
+        <p class="form-message" id="signup-message" hidden></p>
+        <button type="submit" class="btn-submit">Create free account</button>
+        <p class="auth-switch">Already have an account? <a href="login.html" class="text-link">Log in</a></p>
       </form>
     </div>
   </main>
@@ -63,6 +77,6 @@
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/menu.js"></script>
-  <script src="js/forgot-password.js"></script>
+  <script src="js/signup.js"></script>
 </body>
 </html>

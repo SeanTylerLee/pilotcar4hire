@@ -61,7 +61,7 @@ async function requireAuth() {
   await initAuth();
   if (useLocalDev()) return DEV_PILOT_USER;
   if (!cachedUser) {
-    window.location.href = 'index.html#signup';
+    window.location.href = 'signup.html';
     return null;
   }
   if (cachedUser.role !== 'pilot-car') {

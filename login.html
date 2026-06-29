@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forgot Password | Pilot Car 4 Hire</title>
+  <title>Log In | Pilot Car 4 Hire</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
@@ -23,19 +23,24 @@
   <main class="main page">
     <div class="page-inner">
       <div class="page-head">
-        <p class="eyebrow">Account recovery</p>
-        <h1 class="page-title">Forgot password</h1>
-        <p class="page-subtitle">Enter your email and we'll send reset instructions.</p>
+        <p class="eyebrow">Pilot car drivers</p>
+        <h1 class="page-title">Log in</h1>
+        <p class="page-subtitle">Access your listing and update your escort details.</p>
       </div>
 
-      <form class="auth-form panel" id="forgot-form">
+      <form class="auth-form panel" id="login-form">
         <label class="field">
           <span class="field-label">Email</span>
           <input type="email" name="email" required autocomplete="email" placeholder="you@company.com">
         </label>
-        <p class="form-message" id="forgot-message" hidden></p>
-        <button type="submit" class="btn-submit">Send reset link</button>
-        <a href="login.html" class="text-link">Back to log in</a>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input type="password" name="password" required autocomplete="current-password">
+        </label>
+        <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+        <p class="form-message" id="login-message" hidden></p>
+        <button type="submit" class="btn-submit">Log in</button>
+        <p class="auth-switch">New here? <a href="signup.html" class="text-link">Sign up free</a> — takes under two minutes.</p>
       </form>
     </div>
   </main>
@@ -63,6 +68,6 @@
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/menu.js"></script>
-  <script src="js/forgot-password.js"></script>
+  <script src="js/login.js"></script>
 </body>
 </html>

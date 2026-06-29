@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#152238">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="description" content="Pilot Car 4 Hire — find certified pilot car escorts for oversized loads. List your services or search by state.">
   <title>Pilot Car 4 Hire | Oversize Load Escorts</title>
   <link rel="stylesheet" href="css/styles.css">
@@ -22,11 +24,10 @@
     <nav class="nav-panel" hidden></nav>
   </header>
 
-  <main class="main">
-    <section class="hero" id="hero-section">
-      <p class="eyebrow">Oversize Load Escorts</p>
-      <h1 class="hero-title">Pilot cars list here.<br>Carriers find them here.</h1>
-      <p class="hero-lead">Click a state on the map to find pilot cars based there. No account required to browse.</p>
+  <main class="main main--home">
+    <section class="hero hero--map-focus" id="hero-section">
+      <h1 class="hero-title">Find pilot cars</h1>
+      <p class="hero-lead">Tap a state or green dot. Browse free — no account needed.</p>
     </section>
 
     <section class="welcome panel" id="welcome-section" hidden>
@@ -39,12 +40,6 @@
     </section>
 
     <div class="home-browse page-inner-wide" id="map">
-      <div class="page-head" id="browse-head">
-        <p class="eyebrow">Directory</p>
-        <h2 class="page-title" id="browse-title">Find a pilot car</h2>
-        <p class="page-subtitle" id="browse-subtitle">Select a state on the map to view pilot cars based there. No account required.</p>
-      </div>
-
       <section class="map-view" id="map-view">
         <div class="map-panel panel">
           <div class="map-stage" id="map-stage">
@@ -61,13 +56,18 @@
             </aside>
           </div>
           <p class="map-error" id="map-error" hidden></p>
-          <p class="map-hint">Scroll or pinch to zoom, drag to pan. Click a green dot for pilot car details, or click a state to browse all listings there.</p>
+          <p class="map-hint"><span class="map-hint-desktop">Scroll or pinch to zoom, drag to pan. </span>Pinch to zoom, drag to move. Tap a dot for details or a state to browse listings.</p>
           <p class="map-legend" aria-hidden="true"><span class="map-legend-dot"></span> Pilot car home base</p>
         </div>
       </section>
 
       <section class="listings-view" id="listings-view" hidden>
         <button type="button" class="back-link" id="back-to-map">&larr; Back to map</button>
+
+        <div class="listings-head" id="listings-head">
+          <h2 class="page-title" id="browse-title">Find a pilot car</h2>
+          <p class="page-subtitle" id="browse-subtitle"></p>
+        </div>
 
         <div class="filters panel">
           <label class="field field-grow">
@@ -91,51 +91,19 @@
       </section>
     </div>
 
-    <section class="driver-section" id="driver-section">
-      <div class="driver-section-head">
+    <section class="driver-cta panel" id="driver-section">
+      <div class="driver-cta-inner">
         <p class="eyebrow">For pilot car drivers</p>
-        <h2 class="page-title">List your service</h2>
-        <p class="page-subtitle">Log in or sign up to create your listing. Carriers browse the map above for free — no account needed.</p>
-      </div>
-
-      <div class="auth-wrapper" id="auth-sections">
-        <div class="auth-grid">
-          <section class="auth-section">
-            <h3 class="auth-title">Log in</h3>
-            <p class="auth-subtitle">Already have a pilot car account.</p>
-            <form class="auth-form" id="login-form" action="#" method="post">
-              <label class="field">
-                <span class="field-label">Email</span>
-                <input type="email" name="email" required autocomplete="email">
-              </label>
-              <label class="field">
-                <span class="field-label">Password</span>
-                <input type="password" name="password" required autocomplete="current-password">
-              </label>
-              <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
-              <button type="submit" class="btn-submit">Log In</button>
-            </form>
-          </section>
-
-          <section class="auth-section" id="signup">
-            <h3 class="auth-title">Sign up</h3>
-            <p class="auth-subtitle">Create your account, then add your listing with escort types, certified states, and contact info.</p>
-            <form class="auth-form" id="signup-form" action="#" method="post">
-              <label class="field">
-                <span class="field-label">Name</span>
-                <input type="text" name="name" required autocomplete="name">
-              </label>
-              <label class="field">
-                <span class="field-label">Email</span>
-                <input type="email" name="email" required autocomplete="email">
-              </label>
-              <label class="field">
-                <span class="field-label">Password</span>
-                <input type="password" name="password" required autocomplete="new-password">
-              </label>
-              <button type="submit" class="btn-submit">Sign Up</button>
-            </form>
-          </section>
+        <h2 class="driver-cta-title">List your service — free</h2>
+        <p class="driver-cta-lead">Sign up in under two minutes. No fees, no credit card. Add your escort types, certified states, and contact info — then appear on the map for carriers to find you.</p>
+        <ul class="driver-cta-perks">
+          <li>Free to join and list</li>
+          <li>Quick setup — name, email, password</li>
+          <li>Visible on the map above</li>
+        </ul>
+        <div class="driver-cta-actions">
+          <a href="signup.html" class="btn-submit">Sign up free</a>
+          <a href="login.html" class="btn-secondary">Log in</a>
         </div>
       </div>
     </section>
@@ -149,7 +117,7 @@
       </div>
       <nav class="footer-nav">
         <a href="index.html#map">Find pilot cars</a>
-        <a href="index.html#signup">List your service</a>
+        <a href="signup.html">List your service</a>
         <a href="account.html">Account</a>
       </nav>
     </div>
@@ -158,7 +126,7 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=8"></script>
+  <script src="js/config.js?v=10"></script>
   <script>
     (function () {
       var el = document.getElementById('site-version');
@@ -175,10 +143,10 @@
   <script src="js/storage.js?v=5"></script>
   <script src="js/auth.js?v=5"></script>
   <script src="js/listing-ui.js?v=5"></script>
-  <script src="js/map-pins.js?v=8"></script>
-  <script src="js/map-zoom.js?v=8"></script>
-  <script src="js/menu.js?v=5"></script>
-  <script src="js/browse.js?v=8"></script>
-  <script src="js/main.js?v=5"></script>
+  <script src="js/map-pins.js?v=10"></script>
+  <script src="js/map-zoom.js?v=10"></script>
+  <script src="js/menu.js?v=10"></script>
+  <script src="js/browse.js?v=10"></script>
+  <script src="js/main.js?v=10"></script>
 </body>
 </html>

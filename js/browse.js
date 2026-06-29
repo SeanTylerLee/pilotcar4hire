@@ -241,8 +241,8 @@ runWhenReady(async () => {
     listingsView.hidden = false;
 
     const name = getStateName(selectedState);
-    browseTitle.textContent = name;
-    browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
+    if (browseTitle) browseTitle.textContent = name;
+    if (browseSubtitle) browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
 
     searchInput.value = '';
     typeFilter.value = '';
@@ -256,8 +256,8 @@ runWhenReady(async () => {
     closeMapPopup();
     listingsView.hidden = true;
     mapView.hidden = false;
-    browseTitle.textContent = 'Find a pilot car';
-    browseSubtitle.textContent = 'Scroll or pinch to zoom, drag to pan, and click a green dot for pilot car details.';
+    if (browseTitle) browseTitle.textContent = 'Find a pilot car';
+    if (browseSubtitle) browseSubtitle.textContent = '';
     history.replaceState(null, '', browseBasePath());
     mapZoom?.reset?.();
     void updateMapPins();
