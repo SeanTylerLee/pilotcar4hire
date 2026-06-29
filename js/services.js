@@ -5,6 +5,7 @@ const LISTING_SERVICES = [
   { value: 'Steereman', label: 'Steereman' },
   { value: 'RouteSurvey', label: 'Route Survey' },
   { value: 'MultipleCars', label: 'Multiple Cars' },
+  { value: 'Flagger', label: 'Flagger' },
 ];
 
 function getServiceLabel(value) {
