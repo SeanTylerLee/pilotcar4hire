@@ -47,10 +47,21 @@
 
       <section class="map-view" id="map-view">
         <div class="map-panel panel">
-          <div class="map-tooltip" id="map-tooltip" hidden></div>
-          <div class="us-map-container" id="us-map-container" aria-label="Interactive map of the United States"></div>
+          <div class="map-stage" id="map-stage">
+            <div class="map-zoom-controls" aria-label="Map zoom controls">
+              <button type="button" class="map-zoom-btn" id="map-zoom-in" aria-label="Zoom in">+</button>
+              <button type="button" class="map-zoom-btn" id="map-zoom-out" aria-label="Zoom out">−</button>
+              <button type="button" class="map-zoom-btn map-zoom-btn-text" id="map-zoom-reset">Reset</button>
+            </div>
+            <div class="map-tooltip" id="map-tooltip" hidden></div>
+            <div class="us-map-container" id="us-map-container" aria-label="Interactive map of the United States"></div>
+            <aside class="map-listing-popup" id="map-listing-popup" hidden aria-live="polite">
+              <button type="button" class="map-popup-close" id="map-popup-close" aria-label="Close listing details">&times;</button>
+              <div id="map-popup-content"></div>
+            </aside>
+          </div>
           <p class="map-error" id="map-error" hidden></p>
-          <p class="map-hint">Green dots show where each pilot car is based. Click a state or dot to view listings.</p>
+          <p class="map-hint">Scroll or pinch to zoom, drag to pan. Click a green dot for pilot car details, or click a state to browse all listings there.</p>
           <p class="map-legend" aria-hidden="true"><span class="map-legend-dot"></span> Pilot car home base</p>
         </div>
       </section>
@@ -147,7 +158,7 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=7"></script>
+  <script src="js/config.js?v=8"></script>
   <script>
     (function () {
       var el = document.getElementById('site-version');
@@ -164,9 +175,10 @@
   <script src="js/storage.js?v=5"></script>
   <script src="js/auth.js?v=5"></script>
   <script src="js/listing-ui.js?v=5"></script>
-  <script src="js/map-pins.js?v=7"></script>
+  <script src="js/map-pins.js?v=8"></script>
+  <script src="js/map-zoom.js?v=8"></script>
   <script src="js/menu.js?v=5"></script>
-  <script src="js/browse.js?v=7"></script>
+  <script src="js/browse.js?v=8"></script>
   <script src="js/main.js?v=5"></script>
 </body>
 </html>

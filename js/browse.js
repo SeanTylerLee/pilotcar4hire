@@ -12,9 +12,13 @@ runWhenReady(async () => {
 
   const mapView = document.getElementById('map-view');
   const listingsView = document.getElementById('listings-view');
+  const mapStage = document.getElementById('map-stage');
   const mapContainer = document.getElementById('us-map-container');
   const mapError = document.getElementById('map-error');
   const mapTooltip = document.getElementById('map-tooltip');
+  const mapPopup = document.getElementById('map-listing-popup');
+  const mapPopupContent = document.getElementById('map-popup-content');
+  const mapPopupClose = document.getElementById('map-popup-close');
   const backBtn = document.getElementById('back-to-map');
   const browseTitle = document.getElementById('browse-title');
   const browseSubtitle = document.getElementById('browse-subtitle');
@@ -34,9 +38,53 @@ runWhenReady(async () => {
   let selectedState = null;
   let allListings = [];
   let mapSvg = null;
+  let mapZoom = null;
+  let activePin = null;
 
   function getMapSvg() {
     return mapContainer?.querySelector('svg.us-map') || null;
+  }
+
+  function clearActivePin() {
+    if (activePin) {
+      activePin.classList.remove('is-selected');
+      activePin = null;
+    }
+  }
+
+  function closeMapPopup() {
+    if (mapPopup) mapPopup.hidden = true;
+    if (mapPopupContent) mapPopupContent.innerHTML = '';
+    clearActivePin();
+    hideTooltip();
+  }
+
+  function showMapPopup(listing, pinEl) {
+    if (!mapPopup || !mapPopupContent) return;
+
+    clearActivePin();
+    if (pinEl) {
+      activePin = pinEl;
+      activePin.classList.add('is-selected');
+    }
+
+    const data = normalizeListing(listing);
+    mapPopupContent.innerHTML = '';
+    mapPopupContent.appendChild(renderListingCard(listing, { showContact: true }));
+
+    const footer = document.createElement('p');
+    footer.className = 'map-popup-footer';
+    const stateName = getStateName(data.homeState);
+    footer.innerHTML = `<button type="button" class="map-popup-link" data-state="${data.homeState}">View all pilot cars in ${stateName} →</button>`;
+    mapPopupContent.appendChild(footer);
+
+    footer.querySelector('.map-popup-link')?.addEventListener('click', () => {
+      closeMapPopup();
+      selectState(data.homeState);
+    });
+
+    mapPopup.hidden = false;
+    hideTooltip();
   }
 
   async function updateMapPins() {
@@ -49,8 +97,9 @@ runWhenReady(async () => {
       await renderMapPins(mapSvg, allListings, {
         onPinHover: showPinTooltip,
         onPinLeave: hideTooltip,
-        onPinActivate: (_event, listing) => {
-          selectState(listing.homeState);
+        onPinActivate: (event, listing, pinEl) => {
+          event.stopPropagation();
+          showMapPopup(listing, pinEl);
         },
       });
     } catch (err) {
@@ -59,6 +108,7 @@ runWhenReady(async () => {
   }
 
   function showPinTooltip(event, listing) {
+    if (mapPopup && !mapPopup.hidden) return;
     const data = normalizeListing(listing);
     mapTooltip.textContent = `${data.businessName} — ${formatHomeLocation(data.homeCity, data.homeState)}`;
     mapTooltip.hidden = false;
@@ -89,10 +139,16 @@ runWhenReady(async () => {
       path.setAttribute('role', 'button');
       path.setAttribute('tabindex', '0');
       path.style.cursor = 'pointer';
-      path.addEventListener('click', () => selectState(path.dataset.state));
+      path.addEventListener('click', (event) => {
+        if (mapZoom?.wasDragged?.()) return;
+        event.stopPropagation();
+        closeMapPopup();
+        selectState(path.dataset.state);
+      });
       path.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
+          closeMapPopup();
           selectState(path.dataset.state);
         }
       });
@@ -124,6 +180,11 @@ runWhenReady(async () => {
     svg.classList.add('us-map');
     mapContainer.innerHTML = '';
     mapContainer.appendChild(document.importNode(svg, true));
+    mapSvg = getMapSvg();
+
+    if (typeof initMapZoom === 'function' && mapStage && mapSvg) {
+      mapZoom = initMapZoom({ container: mapStage, svg: mapSvg });
+    }
 
     bindMapPaths();
     updateMapHighlights();
@@ -150,6 +211,7 @@ runWhenReady(async () => {
   }
 
   function showTooltip(e, path) {
+    if (mapPopup && !mapPopup.hidden) return;
     const count = countListingsForState(path.dataset.state);
     const label = count === 1 ? '1 pilot car' : `${count} pilot cars`;
     mapTooltip.textContent = `${path.dataset.name} — ${label}`;
@@ -158,7 +220,7 @@ runWhenReady(async () => {
   }
 
   function moveTooltip(e) {
-    const panel = mapContainer.closest('.map-panel');
+    const panel = mapStage || mapContainer?.closest('.map-panel');
     if (!panel) return;
     const rect = panel.getBoundingClientRect();
     const x = e?.clientX ?? rect.left + rect.width / 2;
@@ -174,6 +236,7 @@ runWhenReady(async () => {
   function selectState(stateCode) {
     if (!stateCode) return;
     selectedState = stateCode.toUpperCase();
+    closeMapPopup();
     mapView.hidden = true;
     listingsView.hidden = false;
 
@@ -190,12 +253,14 @@ runWhenReady(async () => {
 
   async function showMap() {
     selectedState = null;
+    closeMapPopup();
     listingsView.hidden = true;
     mapView.hidden = false;
     browseTitle.textContent = 'Find a pilot car';
-    browseSubtitle.textContent = 'Select a state on the map to view pilot cars based there. No account required.';
+    browseSubtitle.textContent = 'Scroll or pinch to zoom, drag to pan, and click a green dot for pilot car details.';
     history.replaceState(null, '', browseBasePath());
-    await updateMapPins();
+    mapZoom?.reset?.();
+    void updateMapPins();
   }
 
   function renderListings() {
@@ -242,6 +307,20 @@ runWhenReady(async () => {
       listingsEl.appendChild(renderListingCard(listing));
     });
   }
+
+  if (mapPopupClose) mapPopupClose.addEventListener('click', closeMapPopup);
+
+  if (mapStage) {
+    mapStage.addEventListener('click', (event) => {
+      if (event.target === mapStage || event.target === mapContainer) {
+        closeMapPopup();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMapPopup();
+  });
 
   backBtn.addEventListener('click', () => { showMap(); });
   searchInput.addEventListener('input', renderListings);

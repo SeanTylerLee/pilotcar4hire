@@ -968,10 +968,61 @@ button { font-family: inherit; }
   overflow: hidden;
 }
 
+.map-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  touch-action: none;
+  cursor: grab;
+}
+
+.map-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.map-zoom-controls {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 12;
+  display: flex;
+  gap: 0.375rem;
+}
+
+.map-zoom-btn {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--navy);
+  background: var(--white);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.map-zoom-btn:hover,
+.map-zoom-btn:focus-visible {
+  background: var(--bg);
+  border-color: var(--navy-mid);
+}
+
+.map-zoom-btn-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0 0.625rem;
+}
+
 .us-map-container {
   width: 100%;
   max-width: 100%;
-  min-height: 280px;
+  min-height: 320px;
 }
 
 .us-map {
@@ -1098,6 +1149,90 @@ button { font-family: inherit; }
 
 .map-pin.is-approximate .map-pin-dot {
   fill: #3d9e6a;
+}
+
+.map-pin.is-selected .map-pin-dot {
+  fill: var(--navy);
+  stroke-width: 3;
+}
+
+.map-pin.is-selected .map-pin-ring {
+  opacity: 1;
+  stroke: var(--navy);
+}
+
+.map-listing-popup {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 15;
+  max-height: min(70%, 420px);
+  overflow: auto;
+  padding: 1rem 1rem 0.75rem;
+  background: var(--white);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  animation: fadeUp 0.25s ease-out;
+}
+
+.map-popup-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.375rem;
+  line-height: 1;
+  color: var(--slate);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.map-popup-close:hover,
+.map-popup-close:focus-visible {
+  color: var(--navy);
+  background: var(--bg);
+}
+
+.map-listing-popup .listing-card {
+  box-shadow: none;
+  border: none;
+  padding: 0.25rem 2rem 0 0;
+}
+
+.map-popup-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.map-popup-link {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--navy-mid);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.map-popup-link:hover,
+.map-popup-link:focus-visible {
+  color: var(--navy);
+}
+
+@media (min-width: 640px) {
+  .map-listing-popup {
+    left: auto;
+    width: min(360px, calc(100% - 1.5rem));
+  }
 }
 
 .listings-view {

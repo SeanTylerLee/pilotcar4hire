@@ -192,10 +192,13 @@ async function renderMapPins(svg, listings, handlers = {}) {
     pin.appendChild(ring);
 
     const activate = (event) => {
+      event.stopPropagation();
       if (handlers.onPinActivate) handlers.onPinActivate(event, data, pin);
     };
 
     pin.addEventListener('click', activate);
+    pin.addEventListener('mousedown', (event) => event.stopPropagation());
+    pin.addEventListener('pointerdown', (event) => event.stopPropagation());
     pin.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
