@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-label="Map of the United States">
+  <style>
+    .state { fill: #d8dbe3; stroke: #ffffff; stroke-width: 1; cursor: pointer; transition: fill 0.2s ease; }
+    .state:hover, .state:focus-visible { fill: #1e3254; outline: none; }
+    .state.has-listings { fill: #a8b4c8; }
+    .state.has-listings:hover, .state.has-listings:focus-visible { fill: #152238; }
+  </style>
   <g id="continental">
     <path id="state-AL" class="state" data-state="AL" data-name="Alabama" d="M616.6,342.2 L645.4,342.5 L648.2,362.7 L652.3,392.4 L654.1,398.9 L655.9,402.6 L655.2,404.9 L657.1,406.3 L654.3,409.3 L654.4,412.2 L653.0,416.2 L654.6,423.3 L653.4,429.4 L655.2,435.9 L647.1,436.0 L612.7,436.0 L612.2,439.1 L615.8,443.6 L615.2,447.4 L616.5,449.3 L614.0,452.8 L611.8,453.6 L607.7,449.7 L607.2,444.0 L606.0,443.3 L604.4,447.7 L603.9,451.9 L599.7,450.8 L598.4,414.9 L602.2,370.4 L604.5,344.7 L602.8,342.3 L616.6,342.2 Z"/>
     <path id="state-AR" class="state" data-state="AR" data-name="Arkansas" d="M500.1,307.0 L570.9,307.1 L572.3,311.6 L569.8,314.4 L567.2,318.8 L577.8,318.8 L577.3,323.2 L574.8,324.4 L574.3,328.0 L571.2,331.9 L571.5,337.5 L569.9,341.6 L568.3,342.3 L569.3,344.3 L566.7,346.1 L565.5,350.1 L563.8,351.1 L564.1,355.8 L561.1,357.1 L561.2,358.6 L557.8,362.4 L558.8,365.0 L555.8,368.7 L553.2,375.9 L556.1,379.0 L554.6,380.9 L555.5,385.8 L554.3,389.0 L514.3,388.6 L507.2,388.6 L507.2,376.2 L504.8,375.1 L501.6,376.3 L499.9,374.1 L500.8,332.9 L497.8,307.0 L500.1,307.0 Z"/>

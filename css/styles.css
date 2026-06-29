@@ -112,6 +112,20 @@ button { font-family: inherit; }
   width: auto;
 }
 
+.version-badge {
+  grid-column: 1;
+  justify-self: start;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--slate);
+  padding: 0.25rem 0.5rem;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 .menu-btn {
   grid-column: 3;
   justify-self: end;
@@ -935,12 +949,28 @@ button { font-family: inherit; }
 .us-map-container {
   width: 100%;
   max-width: 100%;
+  min-height: 280px;
 }
 
 .us-map {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.map-fallback {
+  text-align: center;
+  padding: 2rem;
+  color: var(--slate);
+  font-size: 0.9375rem;
+}
+
+.map-error {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--danger);
 }
 
 .us-map .state {

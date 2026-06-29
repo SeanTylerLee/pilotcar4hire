@@ -4,6 +4,7 @@ runWhenReady(async () => {
   const mapView = document.getElementById('map-view');
   const listingsView = document.getElementById('listings-view');
   const mapContainer = document.getElementById('us-map-container');
+  const mapError = document.getElementById('map-error');
   const mapTooltip = document.getElementById('map-tooltip');
   const backBtn = document.getElementById('back-to-map');
   const browseTitle = document.getElementById('browse-title');
@@ -28,9 +29,14 @@ runWhenReady(async () => {
     return allListings.filter((l) => listingMatchesState(l, stateCode)).length;
   }
 
+  function getMapPaths() {
+    return mapContainer ? [...mapContainer.querySelectorAll('.state')] : [];
+  }
+
   function updateMapHighlights() {
-    if (!mapContainer.querySelector('.state')) return;
-    mapContainer.querySelectorAll('.state').forEach((path) => {
+    const paths = getMapPaths();
+    if (!paths.length) return;
+    paths.forEach((path) => {
       const code = path.dataset.state;
       const count = countListingsForState(code);
       path.classList.toggle('has-listings', count > 0);
@@ -38,27 +44,11 @@ runWhenReady(async () => {
     });
   }
 
-  async function loadListings() {
-    try {
-      allListings = await getAllListingsWithUsers();
-    } catch (err) {
-      console.error(err);
-      allListings = [];
-    }
-    updateMapHighlights();
-    if (selectedState) renderListings();
-  }
-
-  async function loadMap() {
-    const res = await fetch('images/us-map.svg');
-    const svgText = await res.text();
-    mapContainer.innerHTML = svgText;
-    const svg = mapContainer.querySelector('svg');
-    if (svg) svg.classList.add('us-map');
-
-    mapContainer.querySelectorAll('.state').forEach((path) => {
+  function bindMapPaths() {
+    getMapPaths().forEach((path) => {
       path.setAttribute('role', 'button');
       path.setAttribute('tabindex', '0');
+      path.style.cursor = 'pointer';
       path.addEventListener('click', () => selectState(path.dataset.state));
       path.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -72,8 +62,45 @@ runWhenReady(async () => {
       path.addEventListener('focus', (e) => showTooltip(e, path));
       path.addEventListener('blur', hideTooltip);
     });
+  }
 
+  async function loadMap() {
+    const mapUrl = new URL('images/us-map.svg', document.baseURI).href;
+    const res = await fetch(mapUrl);
+    if (!res.ok) throw new Error(`Map failed to load (${res.status}).`);
+
+    const svgText = await res.text();
+    const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+    const svg = doc.documentElement;
+
+    if (svg.querySelector('parsererror')) {
+      throw new Error('Map file is invalid.');
+    }
+
+    svg.classList.add('us-map');
+    mapContainer.innerHTML = '';
+    mapContainer.appendChild(svg);
+
+    bindMapPaths();
     updateMapHighlights();
+  }
+
+  function showMapError(message) {
+    if (mapError) {
+      mapError.textContent = message;
+      mapError.hidden = false;
+    }
+  }
+
+  async function loadListings() {
+    try {
+      allListings = await getAllListingsWithUsers();
+    } catch (err) {
+      console.error(err);
+      allListings = [];
+    }
+    updateMapHighlights();
+    if (selectedState) renderListings();
   }
 
   function showTooltip(e, path) {
@@ -171,10 +198,16 @@ runWhenReady(async () => {
   typeFilter.addEventListener('change', renderListings);
 
   await loadListings();
-  await loadMap();
+
+  try {
+    await loadMap();
+  } catch (err) {
+    console.error(err);
+    showMapError('Map failed to load. Refresh the page or check that images/us-map.svg is deployed.');
+  }
 
   const hash = window.location.hash.replace('#', '').toUpperCase();
-  if (hash && US_STATES.includes(hash)) {
+  if (hash && US_STATES.includes(hash) && getMapPaths().length) {
     selectState(hash);
   }
 });
