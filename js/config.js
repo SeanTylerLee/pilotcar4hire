@@ -1,14 +1,13 @@
 // Bump when shipping frontend changes (shown on index page).
-window.SITE_VERSION = 'v2';
+window.SITE_VERSION = 'v3';
 
 // Set to true while building the frontend (no Supabase required).
 // Set to false when Supabase is configured and ready.
-window.DEV_MODE = true;
+window.DEV_MODE = false;
 
 // Supabase project: PilotCar4Hire
-// Replace placeholders when connecting the backend.
-window.SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
-window.SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+window.SUPABASE_URL = 'https://jefzhadejttqniktjtpu.supabase.co';
+window.SUPABASE_ANON_KEY = 'sb_publishable_WTFyVuiEIYsYYKSUYB7RRQ_-vMnviAJ';
 
 function isSupabaseConfigured() {
   return window.SUPABASE_URL
