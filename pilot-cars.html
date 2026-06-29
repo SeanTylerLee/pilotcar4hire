@@ -4,10 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#152238">
-  <meta name="description" content="Browse pilot car escorts in every U.S. state. Find lead, chase, hi-pole, and route survey services near your route.">
-  <title>Pilot Cars by State | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=21">
+  <meta name="description" content="US pilot car directory by state. Browse certified pilot cars in all 50 states — lead, chase, hi-pole, route survey, steereman, and flagger escorts. Free to browse, no account required.">
+  <meta name="keywords" content="pilot car directory, pilot cars by state, us pilot cars, uspilotcars, pilot car escort directory">
+  <title>Pilot Car Directory by State | US Pilot Cars — Pilot Car 4 Hire</title>
+  <link rel="canonical" href="https://www.pilotcar4hire.com/pilot-cars.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pilot Car 4 Hire">
+  <meta property="og:title" content="Pilot Car Directory by State | US Pilot Cars">
+  <meta property="og:description" content="Browse certified pilot cars in every U.S. state. Free pilot car directory — contact escorts directly.">
+  <meta property="og:url" content="https://www.pilotcar4hire.com/pilot-cars.html">
+  <meta property="og:image" content="https://www.pilotcar4hire.com/images/icon-512.png">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pilot Car Directory by State | US Pilot Cars">
+  <meta name="twitter:description" content="Browse certified pilot cars in every U.S. state. Free pilot car directory.">
+  <meta name="twitter:image" content="https://www.pilotcar4hire.com/images/icon-512.png">
+  <link rel="stylesheet" href="css/styles.css?v=24">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "US Pilot Car Directory by State",
+    "description": "Browse certified pilot car escorts in every U.S. state.",
+    "url": "https://www.pilotcar4hire.com/pilot-cars.html",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Pilot Car 4 Hire",
+      "url": "https://www.pilotcar4hire.com"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.pilotcar4hire.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Pilot Car Directory", "item": "https://www.pilotcar4hire.com/pilot-cars.html" }
+      ]
+    }
+  }
+  </script>
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
@@ -20,9 +54,9 @@
   <main class="main page" id="main-content">
     <div class="page-inner page-inner-wide">
       <div class="page-head">
-        <p class="eyebrow">Directory</p>
-        <h1 class="page-title">Pilot cars by state</h1>
-        <p class="page-subtitle">Choose a state to see escorts based there. Each listing includes contact info — no account needed to browse.</p>
+        <p class="eyebrow">US pilot car directory</p>
+        <h1 class="page-title">Pilot car directory by state</h1>
+        <p class="page-subtitle">Browse <strong>US pilot cars</strong> in all 50 states. Choose a state to see certified escorts based there — lead, chase, hi-pole, route survey, and more. Each listing includes contact info; no account needed to browse our free <strong>pilot car directory</strong>.</p>
       </div>
 
       <div class="state-directory-grid panel" id="state-directory" aria-label="U.S. states"></div>
@@ -37,9 +71,19 @@
       </div>
       <nav class="footer-nav">
         <a href="index.html#map">Find pilot cars</a>
-        <a href="pilot-cars.html">Browse by state</a>
+        <a href="pilot-cars.html">Pilot car directory</a>
         <a href="signup.html">List your service</a>
         <a href="account.html">Account</a>
+      </nav>
+      <nav class="footer-seo" aria-label="US pilot cars by state">
+        <a href="state.html?state=TX">TX</a>
+        <a href="state.html?state=NM">NM</a>
+        <a href="state.html?state=OK">OK</a>
+        <a href="state.html?state=LA">LA</a>
+        <a href="state.html?state=AR">AR</a>
+        <a href="state.html?state=CA">CA</a>
+        <a href="state.html?state=FL">FL</a>
+        <a href="pilot-cars.html">All states</a>
       </nav>
     </div>
     <div class="footer-bottom">
@@ -47,13 +91,13 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=22"></script>
+  <script src="js/config.js?v=24"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=18"></script>
-  <script src="js/states.js?v=18"></script>
-  <script src="js/storage.js?v=18"></script>
-  <script src="js/auth.js?v=18"></script>
-  <script src="js/menu.js?v=18"></script>
+  <script src="js/supabase-client.js?v=24"></script>
+  <script src="js/states.js?v=24"></script>
+  <script src="js/storage.js?v=24"></script>
+  <script src="js/auth.js?v=24"></script>
+  <script src="js/menu.js?v=24"></script>
   <script>
     runWhenReady(async () => {
       initNav('pilot-cars');

@@ -65,13 +65,17 @@ runWhenReady(async () => {
 
   if (pageContext.isStatePage && pageContext.lockedState) {
     const stateName = getStateName(pageContext.lockedState);
-    document.title = `Pilot Cars in ${stateName} | Pilot Car 4 Hire`;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.content = `Find certified pilot car escorts based in ${stateName}. Browse lead, chase, hi-pole, and route survey services — contact drivers directly.`;
+    if (typeof applyStatePageSeo === 'function') {
+      applyStatePageSeo(pageContext.lockedState);
+    } else {
+      document.title = `Pilot Cars in ${stateName} | US Pilot Car Directory`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.content = `Find certified pilot cars in ${stateName}. Browse lead, chase, hi-pole, route survey, and flagger escorts — contact drivers directly.`;
+      }
     }
     if (heroTitle) heroTitle.innerHTML = `Pilot cars in <span class="hero-accent">${stateName}</span>`;
-    if (heroLead) heroLead.textContent = 'Browse escorts based in this state. Tap a dot on the map or scroll listings below.';
+    if (heroLead) heroLead.textContent = `Browse ${stateName} pilot cars in our nationwide directory. Tap a dot on the map or scroll listings below.`;
     if (backBtn) {
       backBtn.textContent = '← All states';
       backBtn.classList.add('back-link--directory');

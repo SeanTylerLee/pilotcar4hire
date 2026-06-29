@@ -1,7 +1,7 @@
 {
   "name": "Pilot Car 4 Hire",
   "short_name": "PC4H",
-  "description": "Find certified pilot car escorts for oversized loads.",
+  "description": "US pilot car directory — find certified pilot cars and escorts for oversized loads nationwide.",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
