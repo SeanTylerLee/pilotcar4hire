@@ -26,96 +26,107 @@
     <section class="hero" id="hero-section">
       <p class="eyebrow">Oversize Load Escorts</p>
       <h1 class="hero-title">Pilot cars list here.<br>Carriers find them here.</h1>
-      <p class="hero-lead">The professional directory for certified pilot car escorts. List your services or search by state and escort type.</p>
-      <div class="hero-actions">
-        <a href="index.html#signup" class="btn-submit">List your service</a>
-        <a href="browse.html" class="btn-secondary">Find a pilot car</a>
-      </div>
-      <dl class="hero-stats">
-        <div class="hero-stat">
-          <strong>50 States</strong>
-          <span>Searchable directory</span>
-        </div>
-        <div class="hero-stat">
-          <strong>Direct contact</strong>
-          <span>Call drivers directly</span>
-        </div>
-        <div class="hero-stat">
-          <strong>Free to list</strong>
-          <span>For pilot car drivers</span>
-        </div>
-      </dl>
+      <p class="hero-lead">Click a state on the map to find pilot cars based there. No account required to browse.</p>
     </section>
 
     <section class="welcome panel" id="welcome-section" hidden>
       <h2 class="auth-title">Welcome back, <span id="welcome-name"></span></h2>
       <p class="auth-subtitle" id="welcome-role"></p>
       <div class="hero-actions">
-        <a href="#" class="btn-submit" id="welcome-primary">Continue</a>
+        <a href="#" class="btn-submit" id="welcome-primary">My listing</a>
         <a href="account.html" class="btn-secondary">Account</a>
       </div>
     </section>
 
-    <section class="features" id="features-section">
-      <div class="features-grid">
-        <article class="feature-card">
-          <span class="feature-icon" aria-hidden="true">01</span>
-          <h3 class="feature-title">List your services</h3>
-          <p class="feature-text">Pilot car drivers create a profile with escort types, certified states, and contact info.</p>
-        </article>
-        <article class="feature-card">
-          <span class="feature-icon" aria-hidden="true">02</span>
-          <h3 class="feature-title">Carriers search free</h3>
-          <p class="feature-text">Filter by state and escort type. No account required to browse the directory.</p>
-        </article>
-        <article class="feature-card">
-          <span class="feature-icon" aria-hidden="true">03</span>
-          <h3 class="feature-title">Contact directly</h3>
-          <p class="feature-text">Call or email drivers straight from their listing. No middleman, no load board.</p>
-        </article>
+    <div class="home-browse page-inner-wide" id="map">
+      <div class="page-head" id="browse-head">
+        <p class="eyebrow">Directory</p>
+        <h2 class="page-title" id="browse-title">Find a pilot car</h2>
+        <p class="page-subtitle" id="browse-subtitle">Select a state on the map to view pilot cars based there. No account required.</p>
+      </div>
+
+      <section class="map-view" id="map-view">
+        <div class="map-panel panel">
+          <div class="map-tooltip" id="map-tooltip" hidden></div>
+          <div class="us-map-container" id="us-map-container" aria-label="Interactive map of the United States"></div>
+          <p class="map-error" id="map-error" hidden></p>
+          <p class="map-hint">Click a state to view pilot cars based there.</p>
+        </div>
+      </section>
+
+      <section class="listings-view" id="listings-view" hidden>
+        <button type="button" class="back-link" id="back-to-map">&larr; Back to map</button>
+
+        <div class="filters panel">
+          <label class="field field-grow">
+            <span class="field-label">Search</span>
+            <input type="search" id="search-input" placeholder="Name, description…">
+          </label>
+          <label class="field">
+            <span class="field-label">Service</span>
+            <select id="type-filter">
+              <option value="">All services</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="results-count" id="results-count"></p>
+        <div class="listings" id="listings"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <p class="empty-state-title">No pilot cars in this state yet</p>
+          <p class="empty-state-text">Try another state, or check back as more drivers list their services.</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="driver-section" id="driver-section">
+      <div class="driver-section-head">
+        <p class="eyebrow">For pilot car drivers</p>
+        <h2 class="page-title">List your service</h2>
+        <p class="page-subtitle">Log in or sign up to create your listing. Carriers browse the map above for free — no account needed.</p>
+      </div>
+
+      <div class="auth-wrapper" id="auth-sections">
+        <div class="auth-grid">
+          <section class="auth-section">
+            <h3 class="auth-title">Log in</h3>
+            <p class="auth-subtitle">Already have a pilot car account.</p>
+            <form class="auth-form" id="login-form" action="#" method="post">
+              <label class="field">
+                <span class="field-label">Email</span>
+                <input type="email" name="email" required autocomplete="email">
+              </label>
+              <label class="field">
+                <span class="field-label">Password</span>
+                <input type="password" name="password" required autocomplete="current-password">
+              </label>
+              <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+              <button type="submit" class="btn-submit">Log In</button>
+            </form>
+          </section>
+
+          <section class="auth-section" id="signup">
+            <h3 class="auth-title">Sign up</h3>
+            <p class="auth-subtitle">Create your account, then add your listing with escort types, certified states, and contact info.</p>
+            <form class="auth-form" id="signup-form" action="#" method="post">
+              <label class="field">
+                <span class="field-label">Name</span>
+                <input type="text" name="name" required autocomplete="name">
+              </label>
+              <label class="field">
+                <span class="field-label">Email</span>
+                <input type="email" name="email" required autocomplete="email">
+              </label>
+              <label class="field">
+                <span class="field-label">Password</span>
+                <input type="password" name="password" required autocomplete="new-password">
+              </label>
+              <button type="submit" class="btn-submit">Sign Up</button>
+            </form>
+          </section>
+        </div>
       </div>
     </section>
-
-    <div class="auth-wrapper" id="auth-sections">
-      <div class="auth-grid">
-        <section class="auth-section">
-          <h2 class="auth-title">Log in</h2>
-          <p class="auth-subtitle">For pilot car drivers with an existing account.</p>
-          <form class="auth-form" id="login-form" action="#" method="post">
-            <label class="field">
-              <span class="field-label">Email</span>
-              <input type="email" name="email" required autocomplete="email">
-            </label>
-            <label class="field">
-              <span class="field-label">Password</span>
-              <input type="password" name="password" required autocomplete="current-password">
-            </label>
-            <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
-            <button type="submit" class="btn-submit">Log In</button>
-          </form>
-        </section>
-
-        <section class="auth-section" id="signup">
-          <h2 class="auth-title">Sign up</h2>
-          <p class="auth-subtitle">Create your pilot car account to list your services. Carriers browse free — no account needed.</p>
-          <form class="auth-form" id="signup-form" action="#" method="post">
-            <label class="field">
-              <span class="field-label">Name</span>
-              <input type="text" name="name" required autocomplete="name">
-            </label>
-            <label class="field">
-              <span class="field-label">Email</span>
-              <input type="email" name="email" required autocomplete="email">
-            </label>
-            <label class="field">
-              <span class="field-label">Password</span>
-              <input type="password" name="password" required autocomplete="new-password">
-            </label>
-            <button type="submit" class="btn-submit">Sign Up</button>
-          </form>
-        </section>
-      </div>
-    </div>
   </main>
 
   <footer class="site-footer">
@@ -125,8 +136,8 @@
         <p class="footer-tagline">Escorts · Leads · Oversize Loads</p>
       </div>
       <nav class="footer-nav">
-        <a href="browse.html">Find pilot cars</a>
-        <a href="pilot-car.html">List your service</a>
+        <a href="index.html#map">Find pilot cars</a>
+        <a href="index.html#signup">List your service</a>
         <a href="account.html">Account</a>
       </nav>
     </div>
@@ -135,7 +146,7 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=4"></script>
+  <script src="js/config.js?v=5"></script>
   <script>
     (function () {
       var el = document.getElementById('site-version');
@@ -147,9 +158,13 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/menu.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/states.js?v=5"></script>
+  <script src="js/services.js?v=5"></script>
+  <script src="js/storage.js?v=5"></script>
+  <script src="js/auth.js?v=5"></script>
+  <script src="js/listing-ui.js?v=5"></script>
+  <script src="js/menu.js?v=5"></script>
+  <script src="js/browse.js?v=5"></script>
+  <script src="js/main.js?v=5"></script>
 </body>
 </html>

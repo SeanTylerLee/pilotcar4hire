@@ -1,5 +1,14 @@
+function isHomeBrowsePage() {
+  const path = window.location.pathname;
+  return path.endsWith('/') || path.endsWith('/index.html') || path.endsWith('index.html');
+}
+
+function browseBasePath() {
+  return isHomeBrowsePage() ? 'index.html' : 'browse.html';
+}
+
 runWhenReady(async () => {
-  initNav('browse');
+  initNav(isHomeBrowsePage() ? 'index' : 'browse');
 
   const mapView = document.getElementById('map-view');
   const listingsView = document.getElementById('listings-view');
@@ -134,7 +143,7 @@ runWhenReady(async () => {
 
     const name = getStateName(selectedState);
     browseTitle.textContent = name;
-    browseSubtitle.textContent = `Pilot cars certified in ${name}. Contact them directly.`;
+    browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
 
     searchInput.value = '';
     typeFilter.value = '';
@@ -148,8 +157,8 @@ runWhenReady(async () => {
     listingsView.hidden = true;
     mapView.hidden = false;
     browseTitle.textContent = 'Find a pilot car';
-    browseSubtitle.textContent = 'Select a state on the map to view certified escorts. No account required.';
-    history.replaceState(null, '', 'browse.html');
+    browseSubtitle.textContent = 'Select a state on the map to view pilot cars based there. No account required.';
+    history.replaceState(null, '', browseBasePath());
   }
 
   function renderListings() {

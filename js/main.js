@@ -9,15 +9,18 @@ runWhenReady(() => {
   const welcomeRole = document.getElementById('welcome-role');
   const welcomePrimary = document.getElementById('welcome-primary');
   const heroSection = document.getElementById('hero-section');
-  const featuresSection = document.getElementById('features-section');
+  const driverSection = document.getElementById('driver-section');
 
   let user = getCurrentUser();
 
-  if (user && welcomeSection && authSections) {
+  if (user && welcomeSection) {
     if (heroSection) heroSection.hidden = true;
-    if (featuresSection) featuresSection.hidden = true;
     welcomeSection.hidden = false;
-    authSections.hidden = true;
+    if (authSections) authSections.hidden = true;
+    if (driverSection) {
+      const driverHead = driverSection.querySelector('.driver-section-head');
+      if (driverHead) driverHead.hidden = true;
+    }
     welcomeName.textContent = user.name;
     welcomeRole.textContent = 'Manage your pilot car listing.';
     welcomePrimary.href = 'pilot-car.html';

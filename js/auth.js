@@ -65,7 +65,7 @@ async function requireAuth() {
     return null;
   }
   if (cachedUser.role !== 'pilot-car') {
-    window.location.href = 'browse.html';
+    window.location.href = 'index.html';
     return null;
   }
   return cachedUser;
