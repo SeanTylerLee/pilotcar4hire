@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create and manage your pilot car listing on Pilot Car 4 Hire.">
+  <title>My Listing | Pilot Car 4 Hire</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="images/logo.svg" type="image/svg+xml">
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">
+      <img src="images/logo.svg" alt="Pilot Car 4 Hire" class="logo-img">
+    </a>
+    <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav class="nav-panel" hidden></nav>
+  </header>
+
+  <main class="main page">
+    <div class="page-inner">
+      <div class="page-head">
+        <p class="eyebrow">Pilot car drivers</p>
+        <h1 class="page-title">Your listing</h1>
+        <p class="page-subtitle">Add your services so trucking companies can find and contact you directly.</p>
+      </div>
+
+      <section class="listing-preview-section" id="listing-preview-section" hidden>
+        <div class="preview-header">
+          <h2 class="section-title">Live preview</h2>
+          <span class="live-badge">Live</span>
+        </div>
+        <div id="listing-preview"></div>
+        <button type="button" class="btn-danger btn-small" id="delete-listing-btn">Remove listing</button>
+      </section>
+
+      <h2 class="section-title" id="form-heading">Create your listing</h2>
+      <form class="listing-form panel" id="listing-form">
+        <label class="field">
+          <span class="field-label">Business / display name</span>
+          <input type="text" name="businessName" required placeholder="Your business or display name">
+        </label>
+
+        <label class="field">
+          <span class="field-label">Phone number</span>
+          <input type="tel" name="phone" required autocomplete="tel" placeholder="(555) 123-4567">
+        </label>
+
+        <fieldset class="checkbox-fieldset">
+          <legend class="field-label">Escort types offered</legend>
+          <div class="checkbox-pills">
+            <label class="checkbox-pill"><input type="checkbox" name="escortTypes" value="Lead"> Lead</label>
+            <label class="checkbox-pill"><input type="checkbox" name="escortTypes" value="Chase"> Chase</label>
+            <label class="checkbox-pill"><input type="checkbox" name="escortTypes" value="High Pole"> High Pole</label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="field-label">States certified</span>
+          <input type="text" name="states" placeholder="e.g. TX, OK, LA, AR" required>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Service area</span>
+          <input type="text" name="serviceArea" placeholder="e.g. TX, OK, LA" required>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Availability</span>
+          <input type="text" name="availability" placeholder="e.g. Available this week">
+        </label>
+
+        <label class="field">
+          <span class="field-label">Notes</span>
+          <textarea name="notes" rows="3" placeholder="Equipment, rates, insurance, or anything carriers should know"></textarea>
+        </label>
+
+        <p class="form-message" id="listing-message" hidden></p>
+        <button type="submit" class="btn-submit">Save listing</button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="images/logo.svg" alt="" class="footer-logo" width="160" height="36">
+        <p class="footer-tagline">Escorts · Leads · Oversize Loads</p>
+      </div>
+      <nav class="footer-nav">
+        <a href="browse.html">Find pilot cars</a>
+        <a href="pilot-car.html">List your service</a>
+        <a href="account.html">Account</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Pilot Car 4 Hire. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/listing-ui.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/pilot-car.js"></script>
+</body>
+</html>

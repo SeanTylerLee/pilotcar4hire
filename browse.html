@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse certified pilot car escorts by state and escort type.">
+  <title>Find Pilot Cars | Pilot Car 4 Hire</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="images/logo.svg" type="image/svg+xml">
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">
+      <img src="images/logo.svg" alt="Pilot Car 4 Hire" class="logo-img">
+    </a>
+    <button class="menu-btn" type="button" aria-label="Open menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <nav class="nav-panel" hidden></nav>
+  </header>
+
+  <main class="main page">
+    <div class="page-inner page-inner-wide">
+      <div class="page-head">
+        <p class="eyebrow">Directory</p>
+        <h1 class="page-title">Find a pilot car</h1>
+        <p class="page-subtitle">Browse certified escorts who have listed their services. No account required.</p>
+      </div>
+
+      <div class="filters panel">
+        <label class="field field-grow">
+          <span class="field-label">Search</span>
+          <input type="search" id="search-input" placeholder="Name, state, service area…">
+        </label>
+        <label class="field">
+          <span class="field-label">State</span>
+          <select id="state-filter">
+            <option value="">All states</option>
+          </select>
+        </label>
+        <label class="field">
+          <span class="field-label">Escort type</span>
+          <select id="type-filter">
+            <option value="">All types</option>
+            <option value="Lead">Lead</option>
+            <option value="Chase">Chase</option>
+            <option value="High Pole">High Pole</option>
+          </select>
+        </label>
+      </div>
+
+      <p class="results-count" id="results-count"></p>
+      <div class="listings" id="listings"></div>
+      <div class="empty-state" id="empty-state" hidden>
+        <p class="empty-state-title">No pilot cars found</p>
+        <p class="empty-state-text">Try adjusting your filters, or check back as more drivers list their services.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="images/logo.svg" alt="" class="footer-logo" width="160" height="36">
+        <p class="footer-tagline">Escorts · Leads · Oversize Loads</p>
+      </div>
+      <nav class="footer-nav">
+        <a href="browse.html">Find pilot cars</a>
+        <a href="pilot-car.html">List your service</a>
+        <a href="account.html">Account</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Pilot Car 4 Hire. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/states.js"></script>
+  <script src="js/listing-ui.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/browse.js"></script>
+</body>
+</html>
