@@ -1,5 +1,5 @@
-// Bump when shipping frontend changes (shown on index page).
-window.SITE_VERSION = 'v21';
+// Bump when shipping frontend changes (shown in footer).
+window.SITE_VERSION = 'v22';
 
 // Set to true while building the frontend (no Supabase required).
 // Set to false when Supabase is configured and ready.
@@ -26,3 +26,18 @@ const DEV_PILOT_USER = {
   email: 'pilot@example.com',
   role: 'pilot-car',
 };
+
+(function renderSiteVersion() {
+  function apply() {
+    const el = document.getElementById('site-version');
+    if (el && window.SITE_VERSION) {
+      el.textContent = window.SITE_VERSION;
+      el.hidden = false;
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', apply);
+  } else {
+    apply();
+  }
+})();
