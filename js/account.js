@@ -1,65 +1,62 @@
-initNav('account');
+runWhenReady(async () => {
+  initNav('account');
 
-const guest = document.getElementById('account-guest');
-const content = document.getElementById('account-content');
-const profileForm = document.getElementById('profile-form');
-const passwordForm = document.getElementById('password-form');
-const profileMessage = document.getElementById('profile-message');
-const passwordMessage = document.getElementById('password-message');
-const dashboardLink = document.getElementById('account-dashboard');
-const logoutBtn = document.getElementById('account-logout');
-const roleHint = document.getElementById('account-role-hint');
+  const guest = document.getElementById('account-guest');
+  const content = document.getElementById('account-content');
+  const profileForm = document.getElementById('profile-form');
+  const passwordForm = document.getElementById('password-form');
+  const profileMessage = document.getElementById('profile-message');
+  const passwordMessage = document.getElementById('password-message');
+  const dashboardLink = document.getElementById('account-dashboard');
+  const logoutBtn = document.getElementById('account-logout');
+  const roleHint = document.getElementById('account-role-hint');
 
-const user = getCurrentUser();
+  const user = getCurrentUser();
 
-function showMessage(el, text, isError) {
-  el.textContent = text;
-  el.hidden = false;
-  el.classList.toggle('is-error', isError);
-}
+  function showMessage(el, text, isError) {
+    el.textContent = text;
+    el.hidden = false;
+    el.classList.toggle('is-error', isError);
+    el.classList.toggle('is-success', !isError);
+  }
 
-if (!user) {
-  guest.hidden = false;
-} else {
+  if (!user) {
+    guest.hidden = false;
+    return;
+  }
+
   content.hidden = false;
   profileForm.name.value = user.name;
   profileForm.email.value = user.email;
-  profileForm.role.value = user.role === 'pilot-car' ? 'Pilot car' : 'Carrier';
-  dashboardLink.href = user.role === 'pilot-car' ? 'pilot-car.html' : 'browse.html';
-  dashboardLink.textContent = user.role === 'pilot-car' ? 'My listing' : 'Find pilot cars';
-  roleHint.textContent = user.role === 'pilot-car'
-    ? 'Your listing is visible to carriers on the browse page.'
-    : 'You can search pilot cars without an account.';
+  profileForm.role.value = 'Pilot car';
+  dashboardLink.href = 'pilot-car.html';
+  dashboardLink.textContent = 'My listing';
+  roleHint.textContent = 'Your listing is visible to carriers on the browse page.';
 
-  profileForm.addEventListener('submit', (e) => {
+  profileForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     profileMessage.hidden = true;
     try {
-      const current = getCurrentUser();
-      updateUser(current.id, { name: profileForm.name.value.trim() });
+      await updateProfileName(profileForm.name.value);
       showMessage(profileMessage, 'Profile updated.', false);
-      const navUser = document.getElementById('nav-user');
-      if (navUser) navUser.textContent = profileForm.name.value.trim();
     } catch (err) {
       showMessage(profileMessage, err.message, true);
     }
   });
 
-  passwordForm.addEventListener('submit', (e) => {
+  passwordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     passwordMessage.hidden = true;
     const data = new FormData(passwordForm);
-    const current = getCurrentUser();
 
-    if (current.password !== data.get('currentPassword')) {
-      showMessage(passwordMessage, 'Current password is incorrect.', true);
-      return;
+    try {
+      await updatePassword(data.get('newPassword'));
+      showMessage(passwordMessage, 'Password updated.', false);
+      passwordForm.reset();
+    } catch (err) {
+      showMessage(passwordMessage, err.message, true);
     }
-
-    updateUser(current.id, { password: data.get('newPassword') });
-    showMessage(passwordMessage, 'Password updated.', false);
-    passwordForm.reset();
   });
 
   logoutBtn.addEventListener('click', logout);
-}
+});

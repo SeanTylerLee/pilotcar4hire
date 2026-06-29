@@ -1,89 +1,126 @@
-const USERS_KEY = 'pc4h_users';
 const LISTINGS_KEY = 'pc4h_listings';
 
-function getUsers() {
-  return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+function mapListingRow(row) {
+  const listing = {
+    id: row.id,
+    userId: row.user_id || row.userId,
+    businessName: row.business_name || row.businessName,
+    yearsExperience: row.years_experience ?? row.yearsExperience ?? null,
+    phone: row.phone,
+    email: row.email || row.profiles?.email || row.userEmail || '',
+    services: row.services || row.escort_types || row.escortTypes || [],
+    statesCertified: row.states_certified || row.statesCertified || [],
+    homeState: row.home_state || row.homeState || '',
+    homeCity: row.home_city || row.homeCity || '',
+    description: row.description || row.notes || '',
+    updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : row.updatedAt,
+    userName: row.profiles?.name || row.userName || '',
+    userEmail: row.profiles?.email || row.userEmail || '',
+  };
+  return normalizeListing(listing);
 }
 
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+function getLocalListings() {
+  return JSON.parse(localStorage.getItem(LISTINGS_KEY) || '[]').map((row) => mapListingRow(row));
 }
 
-function getListings() {
-  return JSON.parse(localStorage.getItem(LISTINGS_KEY) || '[]');
-}
-
-function saveListings(listings) {
+function saveLocalListings(listings) {
   localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
 }
 
-function getListingByUserId(userId) {
-  return getListings().find((l) => l.userId === userId) || null;
+function withDevUser(listing) {
+  return normalizeListing({
+    ...listing,
+    userName: listing.userName || DEV_PILOT_USER.name,
+    email: listing.email || DEV_PILOT_USER.email,
+  });
 }
 
-function upsertListing(listing) {
-  const listings = getListings();
-  const index = listings.findIndex((l) => l.userId === listing.userId);
-  if (index >= 0) {
-    listings[index] = listing;
-  } else {
-    listings.push(listing);
+async function getListingByUserId(userId) {
+  if (useLocalDev()) {
+    const listing = getLocalListings().find((l) => l.userId === userId) || null;
+    return listing ? withDevUser(listing) : null;
   }
-  saveListings(listings);
-  return listing;
+
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*, profiles(name, email)')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return data ? mapListingRow(data) : null;
 }
 
-function getUserByEmail(email) {
-  return getUsers().find((u) => u.email.toLowerCase() === email.toLowerCase()) || null;
-}
+async function upsertListing(listing) {
+  const payload = normalizeListing(listing);
 
-function createUser({ name, email, password, role }) {
-  const users = getUsers();
-  if (users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
-    throw new Error('An account with this email already exists.');
+  if (useLocalDev()) {
+    const raw = JSON.parse(localStorage.getItem(LISTINGS_KEY) || '[]');
+    const index = raw.findIndex((l) => l.userId === payload.userId);
+    const saved = {
+      ...payload,
+      id: payload.id || crypto.randomUUID(),
+      updatedAt: Date.now(),
+    };
+    if (index >= 0) raw[index] = saved;
+    else raw.push(saved);
+    saveLocalListings(raw);
+    return withDevUser(saved);
   }
-  const user = {
-    id: crypto.randomUUID(),
-    name,
-    email,
-    password,
-    role,
-    createdAt: Date.now(),
+
+  const row = {
+    user_id: payload.userId,
+    business_name: payload.businessName,
+    years_experience: payload.yearsExperience,
+    phone: payload.phone,
+    email: payload.email,
+    services: payload.services,
+    states_certified: payload.statesCertified,
+    home_state: payload.homeState,
+    home_city: payload.homeCity,
+    description: payload.description,
   };
-  users.push(user);
-  saveUsers(users);
-  return user;
+
+  if (payload.id) row.id = payload.id;
+
+  const { data, error } = await supabase
+    .from('listings')
+    .upsert(row, { onConflict: 'user_id' })
+    .select('*, profiles(name, email)')
+    .single();
+
+  if (error) throw new Error(error.message);
+  return mapListingRow(data);
 }
 
-function getUserById(id) {
-  return getUsers().find((u) => u.id === id) || null;
-}
-
-function getListingWithUser(listing) {
-  const user = getUserById(listing.userId);
-  return { ...listing, userName: user?.name, userEmail: user?.email };
-}
-
-function getAllListingsWithUsers() {
-  return getListings()
-    .map(getListingWithUser)
-    .sort((a, b) => b.updatedAt - a.updatedAt);
-}
-
-function deleteListingByUserId(userId) {
-  const listings = getListings().filter((l) => l.userId !== userId);
-  saveListings(listings);
-}
-
-function updateUser(userId, updates) {
-  const users = getUsers();
-  const index = users.findIndex((u) => u.id === userId);
-  if (index < 0) throw new Error('User not found.');
-  users[index] = { ...users[index], ...updates };
-  saveUsers(users);
-  const session = getSession?.();
-  if (session?.userId === userId) {
-    setSession(users[index]);
+async function getAllListingsWithUsers() {
+  if (useLocalDev()) {
+    return getLocalListings()
+      .map(withDevUser)
+      .sort((a, b) => b.updatedAt - a.updatedAt);
   }
-  return users[index];
+
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*, profiles(name, email)')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return (data || []).map(mapListingRow);
+}
+
+async function deleteListingByUserId(userId) {
+  if (useLocalDev()) {
+    const raw = JSON.parse(localStorage.getItem(LISTINGS_KEY) || '[]');
+    saveLocalListings(raw.filter((l) => l.userId !== userId));
+    return;
+  }
+
+  const { error } = await supabase
+    .from('listings')
+    .delete()
+    .eq('user_id', userId);
+
+  if (error) throw new Error(error.message);
 }

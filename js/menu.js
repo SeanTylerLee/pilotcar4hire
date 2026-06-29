@@ -2,7 +2,7 @@ const NAV = `
   <ul class="nav-links">
     <li><a href="index.html" data-nav="index">Home</a></li>
     <li><a href="browse.html" data-nav="browse">Find pilot cars</a></li>
-    <li><a href="pilot-car.html" data-nav="pilot-car">Pilot car listing</a></li>
+    <li><a href="pilot-car.html" data-nav="pilot-car">My listing</a></li>
     <li><a href="account.html" data-nav="account">Account</a></li>
   </ul>
   <p class="nav-user" id="nav-user" hidden></p>
@@ -18,17 +18,10 @@ function initNav(currentPage) {
   const currentLink = navPanel.querySelector(`[data-nav="${currentPage}"]`);
   if (currentLink) currentLink.setAttribute('aria-current', 'page');
 
-  const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-  const navUser = document.getElementById('nav-user');
+  refreshNavUser();
+
   const logoutBtn = document.getElementById('logout-btn');
-
-  if (user && navUser) {
-    navUser.textContent = user.name;
-    navUser.hidden = false;
-  }
-
-  if (user && logoutBtn) {
-    logoutBtn.hidden = false;
+  if (logoutBtn) {
     logoutBtn.addEventListener('click', logout);
   }
 

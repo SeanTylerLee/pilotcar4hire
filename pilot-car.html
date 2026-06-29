@@ -22,66 +22,91 @@
   </header>
 
   <main class="main page">
-    <div class="page-inner">
-      <div class="page-head">
-        <p class="eyebrow">Pilot car drivers</p>
-        <h1 class="page-title">Your listing</h1>
-        <p class="page-subtitle">Add your services so trucking companies can find and contact you directly.</p>
+    <div class="page-inner page-inner-listing">
+      <div class="dev-banner panel" id="dev-banner" hidden>
+        <p><strong>Dev mode</strong> — Listing saves to your browser for testing. No login required.</p>
       </div>
 
-      <section class="listing-preview-section" id="listing-preview-section" hidden>
-        <div class="preview-header">
-          <h2 class="section-title">Live preview</h2>
+      <div class="page-head">
+        <p class="eyebrow">Pilot car drivers</p>
+        <h1 class="page-title">My listing</h1>
+        <p class="page-subtitle">This is what carriers see when they search your state. Edit the form below to update it.</p>
+      </div>
+
+      <section class="listing-live-section" id="listing-live-section" hidden>
+        <div class="listing-live-header">
+          <div>
+            <h2 class="section-title">Your live listing</h2>
+            <p class="listing-live-hint">Shown to carriers on the browse page.</p>
+          </div>
           <span class="live-badge">Live</span>
         </div>
         <div id="listing-preview"></div>
-        <button type="button" class="btn-danger btn-small" id="delete-listing-btn">Remove listing</button>
+        <div class="listing-live-actions">
+          <button type="button" class="btn-secondary btn-small" id="scroll-to-edit">Edit listing</button>
+          <button type="button" class="btn-danger btn-small" id="delete-listing-btn">Remove listing</button>
+        </div>
       </section>
 
-      <h2 class="section-title" id="form-heading">Create your listing</h2>
-      <form class="listing-form panel" id="listing-form">
-        <label class="field">
-          <span class="field-label">Business / display name</span>
-          <input type="text" name="businessName" required placeholder="Your business or display name">
-        </label>
+      <section class="listing-edit-section" id="listing-edit-section">
+        <h2 class="section-title" id="form-heading">Create your listing</h2>
+        <form class="listing-form panel" id="listing-form">
+          <label class="field">
+            <span class="field-label">Name or business name</span>
+            <input type="text" name="businessName" required placeholder="Your name or business name">
+          </label>
 
-        <label class="field">
-          <span class="field-label">Phone number</span>
-          <input type="tel" name="phone" required autocomplete="tel" placeholder="(555) 123-4567">
-        </label>
+          <label class="field">
+            <span class="field-label">Years of experience</span>
+            <input type="number" name="yearsExperience" required min="0" max="60" placeholder="e.g. 12">
+          </label>
 
-        <fieldset class="checkbox-fieldset">
-          <legend class="field-label">Escort types offered</legend>
-          <div class="checkbox-pills">
-            <label class="checkbox-pill"><input type="checkbox" name="escortTypes" value="Lead"> Lead</label>
-            <label class="checkbox-pill"><input type="checkbox" name="escortTypes" value="Chase"> Chase</label>
-            <label class="checkbox-pill"><input type="checkbox" name="escortTypes" value="High Pole"> High Pole</label>
+          <label class="field">
+            <span class="field-label">Phone number</span>
+            <input type="tel" name="phone" required autocomplete="tel" placeholder="(555) 123-4567">
+          </label>
+
+          <label class="field">
+            <span class="field-label">Email</span>
+            <input type="email" name="email" required autocomplete="email" placeholder="you@company.com">
+          </label>
+
+          <fieldset class="checkbox-fieldset">
+            <legend class="field-label">Services offered</legend>
+            <div class="checkbox-pills" id="services-checkboxes"></div>
+          </fieldset>
+
+          <fieldset class="checkbox-fieldset">
+            <legend class="field-label">States certified in</legend>
+            <p class="field-hint">Select every state you are certified to escort in.</p>
+            <div class="states-grid" id="states-certified-grid"></div>
+          </fieldset>
+
+          <div class="field-group">
+            <span class="field-label">Based out of</span>
+            <div class="field-row">
+              <label class="field field-grow">
+                <span class="field-label field-label-sr">City</span>
+                <input type="text" name="homeCity" required placeholder="City" autocomplete="address-level2">
+              </label>
+              <label class="field">
+                <span class="field-label field-label-sr">State</span>
+                <select name="homeState" required id="home-state-select">
+                  <option value="">State</option>
+                </select>
+              </label>
+            </div>
           </div>
-        </fieldset>
 
-        <label class="field">
-          <span class="field-label">States certified</span>
-          <input type="text" name="states" placeholder="e.g. TX, OK, LA, AR" required>
-        </label>
+          <label class="field">
+            <span class="field-label">Brief description</span>
+            <textarea name="description" rows="4" placeholder="Tell carriers what they should know about your services, equipment, or coverage"></textarea>
+          </label>
 
-        <label class="field">
-          <span class="field-label">Service area</span>
-          <input type="text" name="serviceArea" placeholder="e.g. TX, OK, LA" required>
-        </label>
-
-        <label class="field">
-          <span class="field-label">Availability</span>
-          <input type="text" name="availability" placeholder="e.g. Available this week">
-        </label>
-
-        <label class="field">
-          <span class="field-label">Notes</span>
-          <textarea name="notes" rows="3" placeholder="Equipment, rates, insurance, or anything carriers should know"></textarea>
-        </label>
-
-        <p class="form-message" id="listing-message" hidden></p>
-        <button type="submit" class="btn-submit">Save listing</button>
-      </form>
+          <p class="form-message" id="listing-message" hidden></p>
+          <button type="submit" class="btn-submit">Save listing</button>
+        </form>
+      </section>
     </div>
   </main>
 
@@ -93,7 +118,7 @@
       </div>
       <nav class="footer-nav">
         <a href="browse.html">Find pilot cars</a>
-        <a href="pilot-car.html">List your service</a>
+        <a href="pilot-car.html">My listing</a>
         <a href="account.html">Account</a>
       </nav>
     </div>
@@ -102,8 +127,13 @@
     </div>
   </footer>
 
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/states.js"></script>
+  <script src="js/services.js"></script>
   <script src="js/listing-ui.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/pilot-car.js"></script>

@@ -23,40 +23,43 @@
 
   <main class="main page">
     <div class="page-inner page-inner-wide">
-      <div class="page-head">
+      <div class="page-head" id="browse-head">
         <p class="eyebrow">Directory</p>
-        <h1 class="page-title">Find a pilot car</h1>
-        <p class="page-subtitle">Browse certified escorts who have listed their services. No account required.</p>
+        <h1 class="page-title" id="browse-title">Find a pilot car</h1>
+        <p class="page-subtitle" id="browse-subtitle">Select a state on the map to view certified escorts. No account required.</p>
       </div>
 
-      <div class="filters panel">
-        <label class="field field-grow">
-          <span class="field-label">Search</span>
-          <input type="search" id="search-input" placeholder="Name, state, service area…">
-        </label>
-        <label class="field">
-          <span class="field-label">State</span>
-          <select id="state-filter">
-            <option value="">All states</option>
-          </select>
-        </label>
-        <label class="field">
-          <span class="field-label">Escort type</span>
-          <select id="type-filter">
-            <option value="">All types</option>
-            <option value="Lead">Lead</option>
-            <option value="Chase">Chase</option>
-            <option value="High Pole">High Pole</option>
-          </select>
-        </label>
-      </div>
+      <section class="map-view" id="map-view">
+        <div class="map-panel panel">
+          <div class="map-tooltip" id="map-tooltip" hidden></div>
+          <div class="us-map-container" id="us-map-container" aria-label="Interactive map of the United States"></div>
+          <p class="map-hint">Click a state to view pilot cars certified there.</p>
+        </div>
+      </section>
 
-      <p class="results-count" id="results-count"></p>
-      <div class="listings" id="listings"></div>
-      <div class="empty-state" id="empty-state" hidden>
-        <p class="empty-state-title">No pilot cars found</p>
-        <p class="empty-state-text">Try adjusting your filters, or check back as more drivers list their services.</p>
-      </div>
+      <section class="listings-view" id="listings-view" hidden>
+        <button type="button" class="back-link" id="back-to-map">&larr; Back to map</button>
+
+        <div class="filters panel">
+          <label class="field field-grow">
+            <span class="field-label">Search</span>
+            <input type="search" id="search-input" placeholder="Name, description…">
+          </label>
+          <label class="field">
+            <span class="field-label">Service</span>
+            <select id="type-filter">
+              <option value="">All services</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="results-count" id="results-count"></p>
+        <div class="listings" id="listings"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <p class="empty-state-title">No pilot cars in this state yet</p>
+          <p class="empty-state-text">Try another state, or check back as more drivers list their services.</p>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -77,9 +80,13 @@
     </div>
   </footer>
 
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/states.js"></script>
+  <script src="js/services.js"></script>
   <script src="js/listing-ui.js"></script>
   <script src="js/menu.js"></script>
   <script src="js/browse.js"></script>

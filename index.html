@@ -27,7 +27,7 @@
       <h1 class="hero-title">Pilot cars list here.<br>Carriers find them here.</h1>
       <p class="hero-lead">The professional directory for certified pilot car escorts. List your services or search by state and escort type.</p>
       <div class="hero-actions">
-        <a href="pilot-car.html" class="btn-submit">List your service</a>
+        <a href="index.html#signup" class="btn-submit">List your service</a>
         <a href="browse.html" class="btn-secondary">Find a pilot car</a>
       </div>
       <dl class="hero-stats">
@@ -79,7 +79,7 @@
       <div class="auth-grid">
         <section class="auth-section">
           <h2 class="auth-title">Log in</h2>
-          <p class="auth-subtitle">Access your account.</p>
+          <p class="auth-subtitle">For pilot car drivers with an existing account.</p>
           <form class="auth-form" id="login-form" action="#" method="post">
             <label class="field">
               <span class="field-label">Email</span>
@@ -94,25 +94,10 @@
           </form>
         </section>
 
-        <section class="auth-section">
+        <section class="auth-section" id="signup">
           <h2 class="auth-title">Sign up</h2>
-          <p class="auth-subtitle">Create an account and choose your role.</p>
+          <p class="auth-subtitle">Create your pilot car account to list your services. Carriers browse free — no account needed.</p>
           <form class="auth-form" id="signup-form" action="#" method="post">
-            <fieldset class="role-fieldset">
-              <legend class="role-legend">I am a…</legend>
-              <div class="role-grid">
-                <label class="role-card">
-                  <input type="radio" name="role" value="pilot-car" required>
-                  <span class="role-card-title">Pilot car</span>
-                  <span class="role-card-desc">List my services and get found.</span>
-                </label>
-                <label class="role-card">
-                  <input type="radio" name="role" value="carrier" required>
-                  <span class="role-card-title">Carrier</span>
-                  <span class="role-card-desc">Search for certified escorts.</span>
-                </label>
-              </div>
-            </fieldset>
             <label class="field">
               <span class="field-label">Name</span>
               <input type="text" name="name" required autocomplete="name">
@@ -149,6 +134,9 @@
     </div>
   </footer>
 
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/menu.js"></script>

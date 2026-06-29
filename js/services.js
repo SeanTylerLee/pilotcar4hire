@@ -1,0 +1,12 @@
+const LISTING_SERVICES = [
+  { value: 'Lead', label: 'Lead' },
+  { value: 'Chase', label: 'Chase' },
+  { value: 'HiPole', label: 'Hi-Pole' },
+  { value: 'Steereman', label: 'Steereman' },
+  { value: 'RouteSurvey', label: 'Route Survey' },
+  { value: 'MultipleCars', label: 'Multiple Cars' },
+];
+
+function getServiceLabel(value) {
+  return LISTING_SERVICES.find((s) => s.value === value)?.label || value;
+}

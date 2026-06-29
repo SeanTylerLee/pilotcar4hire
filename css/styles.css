@@ -621,6 +621,94 @@ button { font-family: inherit; }
   border-color: var(--navy);
 }
 
+.checkbox-fieldset .field-label {
+  margin-bottom: 0.625rem;
+}
+
+.field-hint {
+  font-size: 0.8125rem;
+  color: var(--slate);
+  margin: -0.25rem 0 0.75rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+}
+
+.field-group > .field-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+}
+
+.field-label-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.field-row .field:last-child select {
+  min-width: 8.5rem;
+}
+
+@media (max-width: 540px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .field-row .field:last-child select {
+    min-width: 0;
+  }
+}
+
+.states-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.75rem, 1fr));
+  gap: 0.375rem;
+}
+
+.state-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4375rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--slate);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition);
+  user-select: none;
+}
+
+.state-check input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.state-check:has(input:checked) {
+  color: var(--white);
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
 /* ── Buttons ── */
 .btn-submit {
   display: inline-flex;
@@ -743,7 +831,58 @@ button { font-family: inherit; }
   gap: 1.25rem;
 }
 
-/* Preview */
+.page-inner-listing {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.dev-banner {
+  margin-bottom: 1.25rem;
+  padding: 0.875rem 1.25rem;
+  background: rgba(30, 50, 84, 0.06);
+  border-color: rgba(30, 50, 84, 0.12);
+}
+
+.dev-banner p {
+  font-size: 0.875rem;
+  color: var(--slate);
+  margin: 0;
+}
+
+.listing-live-section {
+  margin-bottom: 2.5rem;
+}
+
+.listing-live-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.listing-live-hint {
+  font-size: 0.875rem;
+  color: var(--slate);
+  margin-top: 0.25rem;
+}
+
+.listing-live-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 1rem;
+}
+
+#listing-preview .listing-card {
+  border-left: 3px solid var(--navy);
+}
+
+.listing-edit-section {
+  scroll-margin-top: 6rem;
+}
+
+/* Preview (legacy) */
 .listing-preview-section {
   margin-bottom: 2rem;
 }
@@ -782,10 +921,101 @@ button { font-family: inherit; }
   border-left: 3px solid var(--navy);
 }
 
-/* Browse */
+/* Browse — map */
+.map-view {
+  margin-bottom: 2rem;
+}
+
+.map-panel {
+  position: relative;
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+.us-map-container {
+  width: 100%;
+  max-width: 100%;
+}
+
+.us-map {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.us-map .state {
+  fill: #d8dbe3;
+  stroke: var(--white);
+  stroke-width: 1;
+  cursor: pointer;
+  transition: fill var(--transition), transform var(--transition);
+}
+
+.us-map .state:hover,
+.us-map .state:focus-visible {
+  fill: var(--navy-mid);
+  outline: none;
+}
+
+.us-map .state.has-listings {
+  fill: #a8b4c8;
+}
+
+.us-map .state.has-listings:hover,
+.us-map .state.has-listings:focus-visible {
+  fill: var(--navy);
+}
+
+.map-tooltip {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  padding: 0.4375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--navy);
+  border-radius: 8px;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+}
+
+.map-hint {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--slate);
+}
+
+.listings-view {
+  animation: fadeUp 0.4s ease-out;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 1.25rem;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--slate);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.back-link:hover {
+  color: var(--navy);
+}
+
+/* Browse — filters & listings */
 .filters {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
   gap: 1rem;
   margin-bottom: 1.25rem;
 }
