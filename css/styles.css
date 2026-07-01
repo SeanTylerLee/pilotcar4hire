@@ -2427,25 +2427,35 @@ button { font-family: inherit; }
   gap: 1rem;
 }
 
+.admin-form-back {
+  margin-bottom: 1rem;
+  max-width: 22rem;
+}
+
+.admin-listings-back {
+  margin-top: 1rem;
+  max-width: 22rem;
+}
+
 .admin-handoff-card {
-  display: grid;
-  gap: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
 }
 
-.admin-handoff-fields {
-  display: grid;
-  gap: 0.875rem;
-}
-
-.admin-handoff-field {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.admin-handoff-value {
-  font-size: 0.9375rem;
+.admin-handoff-name {
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--navy);
-  word-break: break-word;
+}
+
+.admin-handoff-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .admin-handoff-remove {
@@ -2461,11 +2471,6 @@ button { font-family: inherit; }
 
 #admin-listings-error {
   margin: 0 1.5rem 1.25rem;
-}
-
-.admin-listings-back {
-  margin-top: 1rem;
-  max-width: 22rem;
 }
 
 .admin-table-scroll {

@@ -25,6 +25,7 @@
   const listingsError = document.getElementById('admin-listings-error');
   const handoffsList = document.getElementById('admin-handoffs-list');
   const cancelBtn = document.getElementById('admin-cancel-btn');
+  const formBackBtn = document.getElementById('admin-form-back-btn');
   const form = document.getElementById('admin-listing-form');
   const formMessage = document.getElementById('admin-form-message');
   const passwordInput = document.getElementById('admin-login-password');
@@ -102,26 +103,9 @@
   function renderHandoffCard(handoff) {
     return `
       <article class="admin-handoff-card panel" data-handoff-id="${escapeHtml(handoff.id)}">
-        <div class="admin-handoff-fields">
-          <div class="admin-handoff-field">
-            <span class="field-label">Name</span>
-            <span class="admin-handoff-value">${escapeHtml(handoff.contactName)}</span>
-          </div>
-          <div class="admin-handoff-field">
-            <span class="field-label">Email</span>
-            <span class="admin-handoff-value">${escapeHtml(handoff.loginEmail)}</span>
-          </div>
-          <div class="admin-handoff-field">
-            <span class="field-label">Password</span>
-            <span class="admin-handoff-value">${escapeHtml(handoff.tempPassword)}</span>
-          </div>
-          <div class="admin-handoff-field">
-            <span class="field-label">Phone</span>
-            <span class="admin-handoff-value">${escapeHtml(handoff.phone)}</span>
-          </div>
-        </div>
-        <div class="admin-form-actions">
-          <button type="button" class="btn-secondary btn-small" data-copy-handoff="${escapeHtml(handoff.id)}">Copy all info</button>
+        <span class="admin-handoff-name">${escapeHtml(handoff.contactName)}</span>
+        <div class="admin-handoff-actions">
+          <button type="button" class="btn-secondary btn-small" data-copy-handoff="${escapeHtml(handoff.id)}">Copy email</button>
           <button type="button" class="btn-secondary btn-small admin-handoff-remove" data-remove-handoff="${escapeHtml(handoff.id)}">Remove</button>
         </div>
       </article>
@@ -253,6 +237,12 @@
   cancelBtn.addEventListener('click', () => {
     showView('home');
   });
+
+  if (formBackBtn) {
+    formBackBtn.addEventListener('click', () => {
+      showView('home');
+    });
+  }
 
   regenPasswordBtn.addEventListener('click', () => {
     if (!form.contactName.value.trim()) {
