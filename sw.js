@@ -1,10 +1,15 @@
-const CACHE = 'pc4h-shell-v5';
+const CACHE = 'pc4h-shell-v6';
 const SHELL = [
   '/',
   '/index.html',
+  '/favicon.ico',
   '/css/styles.css',
-  '/images/logo.svg',
+  '/images/favicon.ico',
+  '/images/favicon-32.png',
+  '/images/favicon-16.png',
+  '/images/apple-touch-icon.png',
   '/images/icon-192.png',
+  '/images/logo.svg',
   '/manifest.webmanifest',
 ];
 
