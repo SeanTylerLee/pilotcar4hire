@@ -1,5 +1,5 @@
 runWhenReady(async () => {
-  initNav('account');
+  initNav();
 
   const guest = document.getElementById('account-guest');
   const content = document.getElementById('account-content');
@@ -10,8 +10,7 @@ runWhenReady(async () => {
   const dashboardLink = document.getElementById('account-dashboard');
   const logoutBtn = document.getElementById('account-logout');
   const roleHint = document.getElementById('account-role-hint');
-
-  const user = getCurrentUser();
+  const pageSubtitle = document.querySelector('.page-head .page-subtitle');
 
   function showMessage(el, text, isError) {
     el.textContent = text;
@@ -20,18 +19,32 @@ runWhenReady(async () => {
     el.classList.toggle('is-success', !isError);
   }
 
+  function showGuestView() {
+    if (guest) guest.hidden = false;
+    if (content) content.hidden = true;
+    if (pageSubtitle) pageSubtitle.textContent = 'Sign in to manage your profile and password.';
+  }
+
+  function showAccountView(user) {
+    if (guest) guest.hidden = true;
+    if (content) content.hidden = false;
+    if (pageSubtitle) pageSubtitle.textContent = 'Manage your profile and password.';
+
+    profileForm.name.value = user.name;
+    profileForm.email.value = user.email;
+    profileForm.role.value = 'Pilot car';
+    dashboardLink.href = 'pilot-car.html';
+    dashboardLink.textContent = 'My listing';
+    roleHint.textContent = 'Your listing is visible to carriers on the browse page.';
+  }
+
+  const user = getCurrentUser();
   if (!user) {
-    guest.hidden = false;
+    showGuestView();
     return;
   }
 
-  content.hidden = false;
-  profileForm.name.value = user.name;
-  profileForm.email.value = user.email;
-  profileForm.role.value = 'Pilot car';
-  dashboardLink.href = 'pilot-car.html';
-  dashboardLink.textContent = 'My listing';
-  roleHint.textContent = 'Your listing is visible to carriers on the browse page.';
+  showAccountView(user);
 
   profileForm.addEventListener('submit', async (e) => {
     e.preventDefault();

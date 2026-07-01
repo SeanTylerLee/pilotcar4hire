@@ -1,5 +1,5 @@
 // Bump when shipping frontend changes (shown in footer).
-window.SITE_VERSION = 'v30';
+window.SITE_VERSION = 'v34';
 
 // Set to true while building the frontend (no Supabase required).
 // Set to false when Supabase is configured and ready.
@@ -11,7 +11,7 @@ window.SUPABASE_ANON_KEY = 'sb_publishable_WTFyVuiEIYsYYKSUYB7RRQ_-vMnviAJ';
 
 // Emails allowed to access admin.html (your Supabase auth account).
 window.ADMIN_EMAILS = [
-  'seantylerlee@outook.com',
+  'seantylerlee@outlook.com',
 ];
 
 function isAdminEmail(email) {

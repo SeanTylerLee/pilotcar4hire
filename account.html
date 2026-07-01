@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#152238">
   <meta name="description" content="Manage your Pilot Car 4 Hire profile and password.">
   <title>Account | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=21">
+  <link rel="stylesheet" href="css/styles.css?v=32">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
 <body>
@@ -26,11 +26,12 @@
       </div>
 
       <div id="account-guest" class="panel" hidden>
-        <p class="page-subtitle">Accounts are for pilot car drivers only. Carriers can search the directory without signing up.</p>
+        <p class="page-subtitle">You’re not signed in. Log in to manage your listing, or create a free pilot car account.</p>
         <div class="hero-actions hero-actions--start">
-          <a href="signup.html" class="btn-submit">Create pilot car account</a>
-          <a href="index.html#map" class="btn-secondary">Find pilot cars</a>
+          <a href="login.html?next=account.html" class="btn-submit">Log in</a>
+          <a href="signup.html" class="btn-secondary">Create account</a>
         </div>
+        <p class="auth-switch">Carriers can <a href="index.html#map" class="text-link">browse pilot cars</a> without an account.</p>
       </div>
 
       <div id="account-content" class="account-stack" hidden>
@@ -92,16 +93,16 @@
       </nav>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 Pilot Car 4 Hire. All rights reserved.<span class="version-badge" id="site-version" hidden></span></p>
+      <p>&copy; 2026 Pilot Car 4 Hire. All rights reserved. <a href="admin.html" class="footer-admin-link">Admin</a><span class="version-badge" id="site-version" hidden></span></p>
     </div>
   </footer>
 
-  <script src="js/config.js?v=22"></script>
+  <script src="js/config.js?v=32"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=18"></script>
-  <script src="js/storage.js?v=18"></script>
-  <script src="js/auth.js?v=18"></script>
-  <script src="js/menu.js?v=18"></script>
-  <script src="js/account.js?v=18"></script>
+  <script src="js/supabase-client.js?v=32"></script>
+  <script src="js/storage.js?v=32"></script>
+  <script src="js/auth.js?v=32"></script>
+  <script src="js/menu.js?v=32"></script>
+  <script src="js/account.js?v=32"></script>
 </body>
 </html>
