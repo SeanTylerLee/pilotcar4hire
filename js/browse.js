@@ -53,13 +53,14 @@ runWhenReady(async () => {
   const emptyState = document.getElementById('empty-state');
   const resultsCount = document.getElementById('results-count');
   const searchInput = document.getElementById('search-input');
-  const typeFilter = document.getElementById('type-filter');
+  const mapFilterSummary = document.getElementById('map-filter-summary');
   const mapLegendText = document.getElementById('map-legend-text');
   const mapLoadingOverlay = document.getElementById('map-loading-overlay');
   const mapZoomIn = document.getElementById('map-zoom-in');
   const mapZoomOut = document.getElementById('map-zoom-out');
   const mapZoomReset = document.getElementById('map-zoom-reset');
   const mapFiltersEl = document.getElementById('map-filters');
+  const listingsFiltersEl = document.getElementById('listings-service-filters');
   const heroTitle = document.getElementById('hero-title');
   const heroLead = document.getElementById('hero-lead');
 
@@ -83,13 +84,6 @@ runWhenReady(async () => {
     document.body.classList.add('page-state-landing');
   }
 
-  LISTING_SERVICES.forEach((service) => {
-    const option = document.createElement('option');
-    option.value = service.value;
-    option.textContent = service.label;
-    typeFilter.appendChild(option);
-  });
-
   let selectedState = pageContext.lockedState || null;
   let allListings = [];
   let mapSvg = null;
@@ -97,6 +91,7 @@ runWhenReady(async () => {
   let activePin = null;
   let mapServiceFilter = '';
   let pinHandlers = null;
+  let pinRefreshTimer = null;
 
   function getMapSvg() {
     return mapContainer?.querySelector('svg.us-map') || null;
@@ -213,9 +208,18 @@ runWhenReady(async () => {
   }
 
   function refreshPinsFromZoom() {
-    if (typeof refreshMapPinDisplay !== 'function' || !mapSvg) return;
+    if (!mapSvg) return;
     const width = mapZoom?.getViewBoxWidth?.() ?? 960;
-    refreshMapPinDisplay(mapSvg, width, pinHandlers);
+
+    if (typeof scaleMapPins === 'function') {
+      scaleMapPins(mapSvg, width);
+    }
+
+    window.clearTimeout(pinRefreshTimer);
+    pinRefreshTimer = window.setTimeout(() => {
+      if (typeof refreshMapPinDisplay !== 'function') return;
+      refreshMapPinDisplay(mapSvg, width, pinHandlers);
+    }, 150);
   }
 
   async function updateMapPins() {
@@ -399,43 +403,60 @@ runWhenReady(async () => {
     mapTooltip.hidden = true;
   }
 
-  function setMapServiceFilter(value) {
-    mapServiceFilter = value || '';
-    if (typeFilter) typeFilter.value = mapServiceFilter;
-    if (mapFiltersEl) {
-      mapFiltersEl.querySelectorAll('.map-filter-chip').forEach((chip) => {
+  function updateFilterSummary() {
+    if (!mapFilterSummary) return;
+    mapFilterSummary.textContent = mapServiceFilter
+      ? `Showing ${getServiceLabel(mapServiceFilter)} escorts`
+      : 'All escort types';
+  }
+
+  function syncServiceFilterChips() {
+    document.querySelectorAll('[data-service-filter-group]').forEach((group) => {
+      group.querySelectorAll('.service-filter-chip').forEach((chip) => {
         const active = chip.dataset.service === mapServiceFilter
           || (!mapServiceFilter && chip.dataset.service === '');
         chip.classList.toggle('is-active', active);
         chip.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
-    }
+    });
+  }
+
+  function setMapServiceFilter(value) {
+    mapServiceFilter = value || '';
+    syncServiceFilterChips();
+    updateFilterSummary();
     updateMapHighlights();
     updateMapLegend();
     void updateMapPins();
     if (selectedState) renderListings();
   }
 
-  function buildMapFilters() {
-    if (!mapFiltersEl) return;
+  function buildServiceFilterGroup(container) {
+    if (!container) return;
 
     const chips = [
-      { value: '', label: 'All services' },
+      { value: '', label: 'All' },
       ...LISTING_SERVICES.map((s) => ({ value: s.value, label: s.label })),
     ];
 
-    mapFiltersEl.innerHTML = '';
+    container.innerHTML = '';
     chips.forEach((chip) => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'map-filter-chip';
+      btn.className = 'service-filter-chip';
       btn.dataset.service = chip.value;
       btn.textContent = chip.label;
-      btn.setAttribute('aria-pressed', chip.value === '' ? 'true' : 'false');
-      if (chip.value === '') btn.classList.add('is-active');
+      btn.setAttribute('aria-pressed', chip.value === mapServiceFilter ? 'true' : 'false');
+      if (chip.value === mapServiceFilter) btn.classList.add('is-active');
       btn.addEventListener('click', () => setMapServiceFilter(chip.value));
-      mapFiltersEl.appendChild(btn);
+      container.appendChild(btn);
     });
+  }
+
+  function buildMapFilters() {
+    buildServiceFilterGroup(mapFiltersEl);
+    buildServiceFilterGroup(listingsFiltersEl);
+    updateFilterSummary();
   }
 
   function selectState(stateCode) {
@@ -456,7 +477,6 @@ runWhenReady(async () => {
     if (browseSubtitle) browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
 
     searchInput.value = '';
-    typeFilter.value = mapServiceFilter;
     renderListings();
     history.replaceState(null, '', `#${selectedState}`);
     listingsView.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -484,7 +504,7 @@ runWhenReady(async () => {
     if (!selectedState) return;
 
     const query = searchInput.value.trim().toLowerCase();
-    const type = typeFilter.value || mapServiceFilter;
+    const type = mapServiceFilter;
 
     let listings = getFilteredListings().filter((l) => listingMatchesState(l, selectedState));
 
@@ -510,8 +530,8 @@ runWhenReady(async () => {
     listingsEl.innerHTML = '';
     const count = listings.length;
     const stateName = getStateName(selectedState);
-    const filterNote = (typeFilter.value || mapServiceFilter)
-      ? ` offering ${getServiceLabel(typeFilter.value || mapServiceFilter)}`
+    const filterNote = mapServiceFilter
+      ? ` offering ${getServiceLabel(mapServiceFilter)}`
       : '';
     resultsCount.textContent = count === 1
       ? `1 pilot car in ${stateName}${filterNote}`
@@ -560,9 +580,6 @@ runWhenReady(async () => {
   }
 
   searchInput.addEventListener('input', renderListings);
-  typeFilter.addEventListener('change', () => {
-    setMapServiceFilter(typeFilter.value);
-  });
 
   initStateLandingLayout();
   setMapLoading(true);

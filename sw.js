@@ -1,4 +1,4 @@
-const CACHE = 'pc4h-shell-v1';
+const CACHE = 'pc4h-shell-v2';
 const SHELL = [
   '/',
   '/index.html',
@@ -27,6 +27,12 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+
+  // Always fetch JS fresh so config/version updates aren't stuck in cache.
+  if (url.pathname.startsWith('/js/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request)),

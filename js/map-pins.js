@@ -9,8 +9,10 @@ const PIN_FILL = '#0d7a4e';
 const PIN_FILL_APPROX = '#3d9e6a';
 const CLUSTER_MIN_TOTAL = 12;
 const CLUSTER_ZOOM_WIDTH = 130;
+const PIN_BASE_VIEW_WIDTH = 960;
 
 let pinRegistry = [];
+let currentPinViewBoxWidth = PIN_BASE_VIEW_WIDTH;
 let geocodeChain = Promise.resolve();
 const GEOCODE_DELAY_MS = 1100;
 
@@ -174,6 +176,35 @@ async function geocodeHomeCity(city, stateCode) {
   }
 }
 
+function getPinScale(viewBoxWidth) {
+  const width = viewBoxWidth ?? PIN_BASE_VIEW_WIDTH;
+  return Math.min(1, width / PIN_BASE_VIEW_WIDTH);
+}
+
+function applyPinScale(pin, viewBoxWidth) {
+  if (!pin) return;
+
+  const scale = getPinScale(viewBoxWidth);
+  const x = Number(pin.dataset.pinX);
+  const y = Number(pin.dataset.pinY);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+  pin.dataset.pinScale = scale.toFixed(4);
+
+  if (scale >= 0.999) {
+    pin.removeAttribute('transform');
+    return;
+  }
+
+  pin.setAttribute('transform', `translate(${x} ${y}) scale(${scale}) translate(${-x} ${-y})`);
+}
+
+function applyPinScales(svg, viewBoxWidth) {
+  svg?.querySelectorAll('.map-pins > .map-pin').forEach((pin) => {
+    applyPinScale(pin, viewBoxWidth);
+  });
+}
+
 function setPinCoords(pin, coords) {
   if (!pin || !isValidCoord(coords)) return false;
 
@@ -193,6 +224,7 @@ function setPinCoords(pin, coords) {
   if (coords.approximate) pin.setAttribute('class', 'map-pin is-approximate');
   else pin.setAttribute('class', 'map-pin');
 
+  applyPinScale(pin, currentPinViewBoxWidth);
   return true;
 }
 
@@ -392,6 +424,7 @@ function paintMapPins(svg, entries, viewBoxWidth, handlers = {}) {
   clearMapPins(svg);
   if (!entries.length) return 0;
 
+  currentPinViewBoxWidth = viewBoxWidth ?? PIN_BASE_VIEW_WIDTH;
   const layer = ensurePinsLayer(svg);
   let painted = 0;
   const useClusters = shouldClusterPins(viewBoxWidth, entries.length);
@@ -402,6 +435,7 @@ function paintMapPins(svg, entries, viewBoxWidth, handlers = {}) {
       const pin = createClusterPin(group.entries, handlers);
       if (!pin) return;
       layer.appendChild(pin);
+      applyPinScale(pin, currentPinViewBoxWidth);
       painted += 1;
       return;
     }
@@ -410,6 +444,7 @@ function paintMapPins(svg, entries, viewBoxWidth, handlers = {}) {
     if (!pin) return;
     group.entry.pinEl = pin;
     layer.appendChild(pin);
+    applyPinScale(pin, currentPinViewBoxWidth);
     painted += 1;
   });
 
@@ -455,7 +490,14 @@ async function renderMapPins(svg, listings, handlers = {}, options = {}) {
 
 function refreshMapPinDisplay(svg, viewBoxWidth, handlers = {}) {
   if (!svg || !pinRegistry.length) return 0;
-  return paintMapPins(svg, pinRegistry, viewBoxWidth ?? 960, handlers);
+  const width = viewBoxWidth ?? PIN_BASE_VIEW_WIDTH;
+  const painted = paintMapPins(svg, pinRegistry, width, handlers);
+  return painted;
+}
+
+function scaleMapPins(svg, viewBoxWidth) {
+  currentPinViewBoxWidth = viewBoxWidth ?? PIN_BASE_VIEW_WIDTH;
+  applyPinScales(svg, currentPinViewBoxWidth);
 }
 
 function getPinRegistry() {

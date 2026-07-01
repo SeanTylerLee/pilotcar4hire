@@ -1,5 +1,16 @@
 const LISTINGS_KEY = 'pc4h_listings';
 
+function generateId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 function mapListingRow(row) {
   const listing = {
     id: row.id,
@@ -60,7 +71,7 @@ async function upsertListing(listing) {
     const index = raw.findIndex((l) => l.userId === payload.userId);
     const saved = {
       ...payload,
-      id: payload.id || crypto.randomUUID(),
+      id: payload.id || generateId(),
       updatedAt: Date.now(),
     };
     if (index >= 0) raw[index] = saved;

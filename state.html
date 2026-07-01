@@ -68,7 +68,15 @@
 
     <div class="home-browse page-inner-wide" id="map">
       <section class="map-view" id="map-view">
-        <div class="map-filters" id="map-filters" aria-label="Filter pilot cars by service"></div>
+        <section class="service-filter-bar panel" aria-labelledby="service-filter-heading">
+          <div class="service-filter-head">
+            <h2 class="service-filter-label" id="service-filter-heading">Filter by service</h2>
+            <p class="service-filter-summary" id="map-filter-summary">All escort types</p>
+          </div>
+          <div class="service-filter-track">
+            <div class="service-filter-scroll" id="map-filters" data-service-filter-group role="group" aria-label="Filter pilot cars by service"></div>
+          </div>
+        </section>
         <div class="map-panel panel">
           <div class="map-stage is-loading" id="map-stage" aria-busy="true">
             <div class="map-stage-content" id="map-stage-content">
@@ -107,16 +115,17 @@
         </div>
 
         <div class="filters panel">
-          <label class="field field-grow">
-            <span class="field-label">Search</span>
-            <input type="search" id="search-input" placeholder="Name, description…">
-          </label>
           <label class="field">
-            <span class="field-label">Service</span>
-            <select id="type-filter">
-              <option value="">All services</option>
-            </select>
+            <span class="field-label">Search listings</span>
+            <input type="search" id="search-input" placeholder="Name, city, description…">
           </label>
+        </div>
+
+        <div class="service-filter-bar service-filter-bar--inline panel">
+          <p class="service-filter-inline-label">Service type</p>
+          <div class="service-filter-track">
+            <div class="service-filter-scroll" id="listings-service-filters" data-service-filter-group role="group" aria-label="Filter listings by service"></div>
+          </div>
         </div>
 
         <p class="results-count" id="results-count"></p>
@@ -184,7 +193,7 @@
   <script src="js/auth.js?v=24"></script>
   <script src="js/report-listing.js?v=24"></script>
   <script src="js/listing-ui.js?v=24"></script>
-  <script src="js/map-pins.js?v=24"></script>
+  <script src="js/map-pins.js?v=27"></script>
   <script src="js/map-zoom.js?v=24"></script>
   <script src="js/menu.js?v=24"></script>
   <script src="js/browse.js?v=24"></script>
