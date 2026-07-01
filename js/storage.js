@@ -25,6 +25,8 @@ function mapListingRow(row) {
     homeCity: row.home_city || row.homeCity || '',
     description: row.description || row.notes || '',
     updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : row.updatedAt,
+    createdAt: row.profiles?.created_at ? new Date(row.profiles.created_at).getTime() : row.createdAt || null,
+    addedByAdmin: row.added_by_admin ?? row.addedByAdmin ?? false,
     userName: row.profiles?.name || row.userName || '',
     userEmail: row.profiles?.email || row.userEmail || '',
   };
@@ -115,6 +117,24 @@ async function getAllListingsWithUsers() {
   const { data, error } = await supabase
     .from('listings')
     .select('*, profiles(name, email)')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return (data || []).map(mapListingRow);
+}
+
+async function getAdminAddedListings() {
+  if (useLocalDev()) {
+    return getLocalListings()
+      .filter((l) => l.addedByAdmin)
+      .map(withDevUser)
+      .sort((a, b) => (b.createdAt || b.updatedAt || 0) - (a.createdAt || a.updatedAt || 0));
+  }
+
+  const { data, error } = await supabase
+    .from('listings')
+    .select('*, profiles(name, email, created_at)')
+    .eq('added_by_admin', true)
     .order('updated_at', { ascending: false });
 
   if (error) throw new Error(error.message);

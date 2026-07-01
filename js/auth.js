@@ -190,6 +190,77 @@ async function adminLogout() {
   window.location.href = 'admin.html';
 }
 
+function generatePilotPassword(name = '') {
+  const trimmed = String(name).trim();
+  const base = trimmed ? trimmed.split(/\s+/)[0] : '';
+  const bytes = new Uint8Array(1);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    bytes[0] = Math.floor(Math.random() * 256);
+  }
+  const suffix = String((bytes[0] % 900) + 100);
+  return base ? `${base}${suffix}` : suffix;
+}
+
+async function adminCreatePilot({ name, email, password, listing }) {
+  if (useLocalDev() || !supabase) {
+    throw new Error('Admin onboarding requires Supabase.');
+  }
+
+  const { data: { session: adminSession } } = await supabase.auth.getSession();
+  if (!adminSession?.user?.email || !isAdminEmail(adminSession.user.email)) {
+    throw new Error('Admin session expired. Log in again.');
+  }
+
+  const adminTokens = {
+    access_token: adminSession.access_token,
+    refresh_token: adminSession.refresh_token,
+  };
+
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+    options: { data: { name: name.trim(), created_by_admin: true } },
+  });
+
+  if (error) throw new Error(friendlyAuthError(error.message));
+  if (!data.user) throw new Error('Account creation failed.');
+
+  if (!data.session) {
+    await supabase.auth.setSession(adminTokens);
+    throw new Error('Account created but email confirmation is on. Turn off “Confirm email” in Supabase → Authentication → Providers → Email.');
+  }
+
+  const payload = normalizeListing({ ...listing, userId: data.user.id });
+  const { error: listingError } = await supabase.from('listings').insert({
+    user_id: data.user.id,
+    business_name: payload.businessName,
+    years_experience: payload.yearsExperience,
+    phone: payload.phone,
+    email: payload.email,
+    services: payload.services,
+    states_certified: payload.statesCertified,
+    home_state: payload.homeState,
+    home_city: payload.homeCity,
+    description: payload.description || '',
+    added_by_admin: true,
+  });
+
+  if (listingError) {
+    await supabase.auth.setSession(adminTokens);
+    throw new Error(listingError.message);
+  }
+
+  const { error: sessionError } = await supabase.auth.setSession(adminTokens);
+  if (sessionError) {
+    throw new Error('Listing saved but admin session expired. Log in again to continue.');
+  }
+
+  cachedUser = null;
+  return { email: email.trim(), password, userId: data.user.id };
+}
+
 function refreshNavUser() {
   const navUser = document.getElementById('nav-user');
   const logoutBtn = document.getElementById('logout-btn');

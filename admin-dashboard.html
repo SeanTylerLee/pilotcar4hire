@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#152238">
   <meta name="robots" content="noindex, nofollow">
-  <title>Admin Dashboard | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=30">
+  <title>Admin | Pilot Car 4 Hire</title>
+  <link rel="stylesheet" href="css/styles.css?v=40">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
 <body>
@@ -18,65 +18,185 @@
   </header>
 
   <main class="main page" id="main-content">
-    <div class="page-inner page-inner-wide">
-      <div class="page-head">
-        <p class="eyebrow">Site admin</p>
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-subtitle">Overview of pilot car listings and registered drivers.</p>
-      </div>
+    <div class="page-inner page-inner-listing">
+      <section id="admin-home">
+        <div class="admin-home-actions">
+          <button type="button" class="btn-submit admin-start-btn" id="admin-start-btn">Add a pilot car listing</button>
+          <button type="button" class="btn-secondary admin-start-btn" id="admin-listings-btn">Listings added by admin</button>
+        </div>
+      </section>
 
-      <div class="admin-dashboard">
-        <div class="admin-toolbar panel">
-          <p class="admin-signed-in">Signed in as <strong id="admin-email"></strong></p>
-          <button type="button" class="btn-secondary" id="admin-logout-btn">Log out</button>
+      <section id="admin-form-section" hidden>
+        <div class="page-head">
+          <p class="eyebrow">New listing</p>
+          <h1 class="page-title">Pilot car intake</h1>
+          <p class="page-subtitle">Enter what they give you on the call. A login is created automatically when you save.</p>
         </div>
 
-        <div class="admin-stats" id="admin-stats">
-          <div class="admin-stat panel">
-            <p class="admin-stat-label">Pilot car listings</p>
-            <p class="admin-stat-value" id="admin-stat-listings">—</p>
+        <form class="listing-form panel" id="admin-listing-form">
+          <h2 class="section-title">Account (for later login)</h2>
+
+          <label class="field">
+            <span class="field-label">Contact name</span>
+            <input type="text" name="contactName" required placeholder="Name they go by">
+          </label>
+
+          <label class="field">
+            <span class="field-label">Login email</span>
+            <input type="email" name="loginEmail" required autocomplete="off" placeholder="email they want to use">
+          </label>
+
+          <label class="field">
+            <span class="field-label">Temporary password</span>
+            <span class="field-hint">First word before the space, plus a 3-digit number — e.g. Mike Smith → Mike482.</span>
+            <div class="admin-password-row">
+              <input type="text" name="loginPassword" required autocomplete="new-password" minlength="6" id="admin-login-password" readonly>
+              <button type="button" class="btn-secondary btn-small" id="admin-regen-password">New password</button>
+            </div>
+          </label>
+
+          <h2 class="section-title">Listing (what carriers see)</h2>
+
+          <label class="field">
+            <span class="field-label">Name or business name</span>
+            <input type="text" name="businessName" required placeholder="Business or display name">
+          </label>
+
+          <label class="field">
+            <span class="field-label">Years of experience</span>
+            <input type="number" name="yearsExperience" required min="0" max="60" placeholder="e.g. 12">
+          </label>
+
+          <label class="field">
+            <span class="field-label">Phone number</span>
+            <input type="tel" name="phone" required autocomplete="tel" placeholder="(555) 123-4567">
+          </label>
+
+          <label class="field">
+            <span class="field-label">Public email</span>
+            <span class="field-hint">Shown on their listing — can match login email.</span>
+            <input type="email" name="email" required placeholder="you@company.com">
+          </label>
+
+          <fieldset class="checkbox-fieldset">
+            <legend class="field-label">Services offered</legend>
+            <div class="checkbox-pills" id="admin-services-checkboxes"></div>
+          </fieldset>
+
+          <fieldset class="checkbox-fieldset">
+            <legend class="field-label">States certified in</legend>
+            <div class="states-grid" id="admin-states-grid"></div>
+          </fieldset>
+
+          <div class="field-group">
+            <span class="field-label">Based out of</span>
+            <div class="field-row">
+              <label class="field field-grow">
+                <span class="field-label field-label-sr">City</span>
+                <input type="text" name="homeCity" required placeholder="City">
+              </label>
+              <label class="field">
+                <span class="field-label field-label-sr">State</span>
+                <select name="homeState" required id="admin-home-state">
+                  <option value="">State</option>
+                </select>
+              </label>
+            </div>
           </div>
-          <div class="admin-stat panel">
-            <p class="admin-stat-label">Registered drivers</p>
-            <p class="admin-stat-value" id="admin-stat-profiles">—</p>
+
+          <label class="field">
+            <span class="field-label">Brief description</span>
+            <textarea name="description" rows="4" placeholder="Services, equipment, coverage area…"></textarea>
+          </label>
+
+          <p class="form-message" id="admin-form-message" hidden></p>
+
+          <div class="admin-form-actions">
+            <button type="button" class="btn-secondary" id="admin-cancel-btn">Cancel</button>
+            <button type="submit" class="btn-submit">Save listing &amp; create account</button>
           </div>
+        </form>
+      </section>
+
+      <section id="admin-success-section" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Saved</p>
+          <h1 class="page-title">Listing is live</h1>
+          <p class="page-subtitle">Text or email these login details so they can update their listing later.</p>
         </div>
 
-        <div class="admin-table-wrap panel">
-          <h2 class="admin-table-title">All listings</h2>
-          <p class="form-message is-error" id="admin-dashboard-message" hidden></p>
-          <div class="admin-table-scroll">
-            <table class="admin-table" id="admin-listings-table">
+        <div class="admin-credentials panel">
+          <label class="field">
+            <span class="field-label">Login email</span>
+            <div class="admin-copy-row">
+              <input type="text" readonly id="success-email">
+              <button type="button" class="btn-secondary btn-small" data-copy-target="success-email">Copy</button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Password</span>
+            <div class="admin-copy-row">
+              <input type="text" readonly id="success-password">
+              <button type="button" class="btn-secondary btn-small" data-copy-target="success-password">Copy</button>
+            </div>
+          </label>
+
+          <p class="admin-login-hint">They can log in at <strong>pilotcar4hire.com</strong> → Log in → My listing.</p>
+
+          <div class="admin-form-actions">
+            <button type="button" class="btn-secondary" id="admin-copy-all-btn">Copy email &amp; password</button>
+            <button type="button" class="btn-submit" id="admin-add-another-btn">Add another pilot car</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="admin-listings-section" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Admin</p>
+          <h1 class="page-title">Listings added by admin</h1>
+        </div>
+
+        <div class="panel admin-listings-panel">
+          <p class="admin-listings-status" id="admin-listings-loading">Loading…</p>
+          <p class="admin-listings-status" id="admin-listings-empty" hidden>No listings added yet.</p>
+          <p class="form-message is-error" id="admin-listings-error" hidden></p>
+          <div class="admin-table-scroll" id="admin-listings-table-wrap" hidden>
+            <table class="admin-table">
               <thead>
                 <tr>
+                  <th>Contact</th>
                   <th>Business</th>
+                  <th>Login email</th>
+                  <th>Phone</th>
                   <th>Location</th>
-                  <th>Services</th>
-                  <th>Updated</th>
+                  <th>Added</th>
                 </tr>
               </thead>
-              <tbody id="admin-listings-body"></tbody>
+              <tbody id="admin-listings-tbody"></tbody>
             </table>
           </div>
-          <p class="admin-empty" id="admin-listings-empty" hidden>No listings yet.</p>
         </div>
-      </div>
+
+        <button type="button" class="btn-secondary admin-listings-back" id="admin-listings-back-btn">Back</button>
+      </section>
     </div>
   </main>
 
   <footer class="site-footer">
     <div class="footer-bottom">
       <p>&copy; 2026 Pilot Car 4 Hire. <a href="index.html" class="footer-admin-link">Back to site</a><span class="version-badge" id="site-version" hidden></span></p>
+      <button type="button" class="footer-logout-btn" id="admin-logout-btn">Log out</button>
     </div>
   </footer>
 
-  <script src="js/config.js?v=30"></script>
+  <script src="js/config.js?v=40"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=30"></script>
-  <script src="js/states.js?v=30"></script>
-  <script src="js/services.js?v=30"></script>
-  <script src="js/storage.js?v=30"></script>
-  <script src="js/auth.js?v=30"></script>
-  <script src="js/admin-dashboard.js?v=30"></script>
+  <script src="js/supabase-client.js?v=40"></script>
+  <script src="js/states.js?v=40"></script>
+  <script src="js/services.js?v=40"></script>
+  <script src="js/storage.js?v=40"></script>
+  <script src="js/auth.js?v=40"></script>
+  <script src="js/admin-dashboard.js?v=40"></script>
 </body>
 </html>
