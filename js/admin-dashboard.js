@@ -31,7 +31,8 @@
   const passwordInput = document.getElementById('admin-login-password');
   const regenPasswordBtn = document.getElementById('admin-regen-password');
   const servicesEl = document.getElementById('admin-services-checkboxes');
-  const statesGrid = document.getElementById('admin-states-grid');
+  const statesCertGrid = document.getElementById('admin-states-cert-grid');
+  const statesOtherGrid = document.getElementById('admin-states-other-grid');
   const homeStateSelect = document.getElementById('admin-home-state');
   const successWarning = document.getElementById('success-warning');
   const successBackBtn = document.getElementById('admin-success-back-btn');
@@ -43,12 +44,23 @@
     servicesEl.appendChild(label);
   });
 
-  US_STATES.forEach((code) => {
+  function appendStateCheckbox(container, code, { showName = false } = {}) {
     const label = document.createElement('label');
-    label.className = 'state-check';
-    label.innerHTML = `<input type="checkbox" name="statesCertified" value="${code}"> ${code}`;
-    statesGrid.appendChild(label);
+    label.className = showName ? 'state-check state-check--named' : 'state-check';
+    const text = showName ? getStateName(code) : code;
+    label.innerHTML = `<input type="checkbox" name="statesCertified" value="${code}"> ${text}`;
+    container.appendChild(label);
+  }
 
+  CERTIFICATION_REQUIRED_STATES.forEach((code) => {
+    appendStateCheckbox(statesCertGrid, code, { showName: true });
+  });
+
+  US_STATES.filter((code) => !CERTIFICATION_REQUIRED_STATES.includes(code)).forEach((code) => {
+    appendStateCheckbox(statesOtherGrid, code, { showName: true });
+  });
+
+  US_STATES.forEach((code) => {
     const option = document.createElement('option');
     option.value = code;
     option.textContent = `${code} — ${getStateName(code)}`;

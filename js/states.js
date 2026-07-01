@@ -6,6 +6,12 @@ const US_STATES = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
 ];
 
+// States that require pilot car certification — shown first on admin intake.
+const CERTIFICATION_REQUIRED_STATES = [
+  'AZ', 'CO', 'FL', 'GA', 'KS', 'MN', 'NY', 'NC', 'OK', 'PA',
+  'TX', 'UT', 'VA', 'WA', 'LA', 'NM', 'NV', 'WI',
+];
+
 const STATE_NAMES = {
   AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
   CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', DC: 'District of Columbia',
