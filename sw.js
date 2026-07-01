@@ -1,9 +1,8 @@
-const CACHE = 'pc4h-shell-v6';
+const CACHE = 'pc4h-shell-v7';
 const SHELL = [
   '/',
   '/index.html',
   '/favicon.ico',
-  '/css/styles.css',
   '/images/favicon.ico',
   '/images/favicon-32.png',
   '/images/favicon-16.png',
@@ -33,8 +32,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Always fetch JS fresh so config/version updates aren't stuck in cache.
-  if (url.pathname.startsWith('/js/')) {
+  // Always fetch JS and CSS fresh so version bumps aren't stuck in cache.
+  if (url.pathname.startsWith('/js/') || url.pathname.endsWith('.css')) {
     event.respondWith(fetch(event.request));
     return;
   }

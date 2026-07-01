@@ -138,11 +138,6 @@ function initInstallPrompt() {
       wrap.hidden = true;
     });
   }
-
-  if ('serviceWorker' in navigator && window.isSecureContext) {
-    const swUrl = new URL('sw.js', document.baseURI).href;
-    navigator.serviceWorker.register(swUrl).catch(() => undefined);
-  }
 }
 
 runWhenReady(() => {
