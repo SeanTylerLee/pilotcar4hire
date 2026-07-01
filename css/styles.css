@@ -2501,6 +2501,43 @@ button { font-family: inherit; }
   gap: 1rem;
 }
 
+.admin-success-banner {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.admin-success-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--navy);
+}
+
+.admin-success-text {
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--slate);
+}
+
+.admin-handoff-message {
+  width: 100%;
+  min-height: 10rem;
+  padding: 0.875rem 1rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--navy);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+
+.admin-success-actions {
+  margin-top: 0;
+}
+
 .admin-password-row,
 .admin-copy-row {
   display: flex;

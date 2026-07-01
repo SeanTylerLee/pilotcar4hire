@@ -302,13 +302,19 @@ async function adminCreatePilot({ name, email, password, listing }) {
     throw new Error('Listing saved but admin session expired. Log in again to continue.');
   }
 
-  const handoff = await saveAdminPilotHandoff({
-    userId: data.user.id,
-    contactName: name.trim(),
-    loginEmail: email.trim(),
-    tempPassword: password,
-    phone: payload.phone,
-  });
+  let handoffId = null;
+  try {
+    const handoff = await saveAdminPilotHandoff({
+      userId: data.user.id,
+      contactName: name.trim(),
+      loginEmail: email.trim(),
+      tempPassword: password,
+      phone: payload.phone,
+    });
+    handoffId = handoff.id;
+  } catch {
+    /* listing is live — success screen still shows credentials */
+  }
 
   cachedUser = null;
   return {
@@ -317,7 +323,7 @@ async function adminCreatePilot({ name, email, password, listing }) {
     userId: data.user.id,
     contactName: name.trim(),
     phone: payload.phone,
-    handoffId: handoff.id,
+    handoffId,
   };
 }
 

@@ -36,6 +36,7 @@ runWhenReady(async () => {
   const successEmail = document.getElementById('success-email');
   const successPassword = document.getElementById('success-password');
   const successPhone = document.getElementById('success-phone');
+  const successMessage = document.getElementById('success-message');
   const copyAllBtn = document.getElementById('admin-copy-all-btn');
   const addAnotherBtn = document.getElementById('admin-add-another-btn');
 
@@ -70,6 +71,9 @@ runWhenReady(async () => {
     formSection.hidden = view !== 'form';
     successSection.hidden = view !== 'success';
     listingsSection.hidden = view !== 'listings';
+    if (view === 'success') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   function escapeHtml(text) {
@@ -82,11 +86,14 @@ runWhenReady(async () => {
 
   function formatHandoffMessage(handoff) {
     return [
-      'Pilot Car 4 Hire login',
-      `Name: ${handoff.contactName}`,
+      `Hi ${handoff.contactName},`,
+      '',
+      'Your pilot car listing is live on Pilot Car 4 Hire. Use these details to log in and manage your listing:',
+      '',
       `Email: ${handoff.loginEmail}`,
       `Password: ${handoff.tempPassword}`,
       `Phone: ${handoff.phone}`,
+      '',
       'Log in at pilotcar4hire.com',
     ].join('\n');
   }
@@ -201,10 +208,17 @@ runWhenReady(async () => {
   }
 
   function fillSuccessView(result) {
+    const handoff = {
+      contactName: result.contactName,
+      loginEmail: result.email,
+      tempPassword: result.password,
+      phone: result.phone,
+    };
     successName.value = result.contactName;
     successEmail.value = result.email;
     successPassword.value = result.password;
     successPhone.value = result.phone;
+    successMessage.value = formatHandoffMessage(handoff);
   }
 
   showView('home');
@@ -316,12 +330,7 @@ runWhenReady(async () => {
   });
 
   copyAllBtn.addEventListener('click', () => {
-    copyText(formatHandoffMessage({
-      contactName: successName.value,
-      loginEmail: successEmail.value,
-      tempPassword: successPassword.value,
-      phone: successPhone.value,
-    }), copyAllBtn);
+    copyText(successMessage.value, copyAllBtn);
   });
 
   addAnotherBtn.addEventListener('click', () => {

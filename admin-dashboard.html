@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#152238">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=42">
+  <link rel="stylesheet" href="css/styles.css?v=43">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
 <body>
@@ -119,13 +119,23 @@
       </section>
 
       <section id="admin-success-section" hidden>
-        <div class="page-head">
-          <p class="eyebrow">Saved</p>
-          <h1 class="page-title">Successfully added</h1>
-          <p class="page-subtitle">Copy and email this info so they can log in later. It’s also saved under Listings added by admin.</p>
+        <div class="admin-success-banner panel">
+          <h1 class="admin-success-title">Successfully added</h1>
+          <p class="admin-success-text">Their listing is live. Copy the message below and send it to them by email or text.</p>
         </div>
 
         <div class="admin-credentials panel">
+          <label class="field">
+            <span class="field-label">Message to send</span>
+            <textarea class="admin-handoff-message" id="success-message" rows="9" readonly></textarea>
+          </label>
+
+          <div class="admin-form-actions admin-success-actions">
+            <button type="button" class="btn-submit" id="admin-copy-all-btn">Copy message</button>
+          </div>
+
+          <h2 class="section-title">Login details</h2>
+
           <label class="field">
             <span class="field-label">Name</span>
             <div class="admin-copy-row">
@@ -159,8 +169,7 @@
           </label>
 
           <div class="admin-form-actions">
-            <button type="button" class="btn-secondary" id="admin-copy-all-btn">Copy all info</button>
-            <button type="button" class="btn-submit" id="admin-add-another-btn">Add another pilot car</button>
+            <button type="button" class="btn-secondary" id="admin-add-another-btn">Add another pilot car</button>
           </div>
         </div>
       </section>
@@ -191,13 +200,13 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=42"></script>
+  <script src="js/config.js?v=43"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=42"></script>
-  <script src="js/states.js?v=42"></script>
-  <script src="js/services.js?v=42"></script>
-  <script src="js/storage.js?v=42"></script>
-  <script src="js/auth.js?v=42"></script>
-  <script src="js/admin-dashboard.js?v=42"></script>
+  <script src="js/supabase-client.js?v=43"></script>
+  <script src="js/states.js?v=43"></script>
+  <script src="js/services.js?v=43"></script>
+  <script src="js/storage.js?v=43"></script>
+  <script src="js/auth.js?v=43"></script>
+  <script src="js/admin-dashboard.js?v=43"></script>
 </body>
 </html>
