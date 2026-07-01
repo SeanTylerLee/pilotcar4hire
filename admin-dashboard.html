@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#152238">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Dashboard | Pilot Car 4 Hire</title>
+  <link rel="stylesheet" href="css/styles.css?v=30">
+  <link rel="icon" href="images/logo.svg" type="image/svg+xml">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  <header class="header">
+    <a href="index.html" class="logo">
+      <img src="images/logo.svg" alt="Pilot Car 4 Hire" class="logo-img">
+    </a>
+  </header>
+
+  <main class="main page" id="main-content">
+    <div class="page-inner page-inner-wide">
+      <div class="page-head">
+        <p class="eyebrow">Site admin</p>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Overview of pilot car listings and registered drivers.</p>
+      </div>
+
+      <div class="admin-dashboard">
+        <div class="admin-toolbar panel">
+          <p class="admin-signed-in">Signed in as <strong id="admin-email"></strong></p>
+          <button type="button" class="btn-secondary" id="admin-logout-btn">Log out</button>
+        </div>
+
+        <div class="admin-stats" id="admin-stats">
+          <div class="admin-stat panel">
+            <p class="admin-stat-label">Pilot car listings</p>
+            <p class="admin-stat-value" id="admin-stat-listings">—</p>
+          </div>
+          <div class="admin-stat panel">
+            <p class="admin-stat-label">Registered drivers</p>
+            <p class="admin-stat-value" id="admin-stat-profiles">—</p>
+          </div>
+        </div>
+
+        <div class="admin-table-wrap panel">
+          <h2 class="admin-table-title">All listings</h2>
+          <p class="form-message is-error" id="admin-dashboard-message" hidden></p>
+          <div class="admin-table-scroll">
+            <table class="admin-table" id="admin-listings-table">
+              <thead>
+                <tr>
+                  <th>Business</th>
+                  <th>Location</th>
+                  <th>Services</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody id="admin-listings-body"></tbody>
+            </table>
+          </div>
+          <p class="admin-empty" id="admin-listings-empty" hidden>No listings yet.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <p>&copy; 2026 Pilot Car 4 Hire. <a href="index.html" class="footer-admin-link">Back to site</a><span class="version-badge" id="site-version" hidden></span></p>
+    </div>
+  </footer>
+
+  <script src="js/config.js?v=30"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
+  <script src="js/supabase-client.js?v=30"></script>
+  <script src="js/states.js?v=30"></script>
+  <script src="js/services.js?v=30"></script>
+  <script src="js/storage.js?v=30"></script>
+  <script src="js/auth.js?v=30"></script>
+  <script src="js/admin-dashboard.js?v=30"></script>
+</body>
+</html>

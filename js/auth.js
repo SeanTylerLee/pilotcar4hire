@@ -157,6 +157,39 @@ function friendlyAuthError(message) {
   return message;
 }
 
+async function getAdminSession() {
+  if (useLocalDev() || !supabase) return null;
+
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error || !session?.user?.email) return null;
+  if (!isAdminEmail(session.user.email)) return null;
+  return session.user;
+}
+
+async function adminLogin(email, password) {
+  if (useLocalDev() || !supabase) {
+    throw new Error('Admin login requires Supabase. Set DEV_MODE to false.');
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(friendlyAuthError(error.message));
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email || !isAdminEmail(user.email)) {
+    await supabase.auth.signOut();
+    cachedUser = null;
+    throw new Error('This account is not authorized for admin access.');
+  }
+
+  return user;
+}
+
+async function adminLogout() {
+  await supabase.auth.signOut();
+  cachedUser = null;
+  window.location.href = 'admin.html';
+}
+
 function refreshNavUser() {
   const navUser = document.getElementById('nav-user');
   const logoutBtn = document.getElementById('logout-btn');
