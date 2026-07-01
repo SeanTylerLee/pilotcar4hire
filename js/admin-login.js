@@ -1,12 +1,27 @@
-runWhenReady(async () => {
-  const admin = await getAdminSession();
-  if (admin) {
-    window.location.href = 'admin-dashboard.html';
-    return;
-  }
-
+(async function initAdminLogin() {
   const form = document.getElementById('admin-login-form');
   const message = document.getElementById('admin-login-message');
+  if (!form || !message) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const urlError = params.get('error');
+  if (urlError) {
+    message.textContent = urlError;
+    message.classList.add('is-error');
+    message.hidden = false;
+  }
+
+  try {
+    const admin = await getAdminSession();
+    if (admin) {
+      window.location.href = 'admin-dashboard.html';
+      return;
+    }
+  } catch (err) {
+    message.textContent = err.message || 'Could not check login status.';
+    message.classList.add('is-error');
+    message.hidden = false;
+  }
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -26,4 +41,4 @@ runWhenReady(async () => {
       btn.disabled = false;
     }
   });
-});
+})();

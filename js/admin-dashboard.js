@@ -1,5 +1,12 @@
 runWhenReady(async () => {
-  const admin = await getAdminSession();
+  let admin;
+  try {
+    admin = await getAdminSession();
+  } catch (err) {
+    window.location.href = `admin.html?error=${encodeURIComponent(err.message)}`;
+    return;
+  }
+
   if (!admin) {
     window.location.href = 'admin.html';
     return;

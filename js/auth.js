@@ -36,10 +36,38 @@ async function initAuth() {
     authReadyPromise = (async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) throw new Error(error.message);
-      cachedUser = session?.user ? await fetchProfile(session.user.id) : null;
+
+      if (session?.user) {
+        try {
+          cachedUser = await fetchProfile(session.user.id);
+        } catch {
+          cachedUser = {
+            id: session.user.id,
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email,
+            role: 'pilot-car',
+          };
+        }
+      } else {
+        cachedUser = null;
+      }
 
       supabase.auth.onAuthStateChange(async (_event, session) => {
-        cachedUser = session?.user ? await fetchProfile(session.user.id) : null;
+        if (!session?.user) {
+          cachedUser = null;
+          refreshNavUser();
+          return;
+        }
+        try {
+          cachedUser = await fetchProfile(session.user.id);
+        } catch {
+          cachedUser = {
+            id: session.user.id,
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+            email: session.user.email,
+            role: 'pilot-car',
+          };
+        }
         refreshNavUser();
       });
 
@@ -161,7 +189,8 @@ async function getAdminSession() {
   if (useLocalDev() || !supabase) return null;
 
   const { data: { session }, error } = await supabase.auth.getSession();
-  if (error || !session?.user?.email) return null;
+  if (error) throw new Error(error.message);
+  if (!session?.user?.email) return null;
   if (!isAdminEmail(session.user.email)) return null;
   return session.user;
 }
@@ -171,14 +200,30 @@ async function adminLogin(email, password) {
     throw new Error('Admin login requires Supabase. Set DEV_MODE to false.');
   }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const normalizedEmail = String(email || '').trim();
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: normalizedEmail,
+    password,
+  });
   if (error) throw new Error(friendlyAuthError(error.message));
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = data?.user;
   if (!user?.email || !isAdminEmail(user.email)) {
     await supabase.auth.signOut();
     cachedUser = null;
     throw new Error('This account is not authorized for admin access.');
+  }
+
+  cachedUser = null;
+  try {
+    cachedUser = await fetchProfile(user.id);
+  } catch {
+    cachedUser = {
+      id: user.id,
+      name: user.user_metadata?.name || user.email.split('@')[0],
+      email: user.email,
+      role: 'pilot-car',
+    };
   }
 
   return user;
