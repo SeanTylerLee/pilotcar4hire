@@ -2525,6 +2525,11 @@ button { font-family: inherit; }
   color: var(--slate);
 }
 
+.admin-success-back {
+  margin-top: 1rem;
+  max-width: 22rem;
+}
+
 #success-warning {
   margin: 0.75rem 0 0;
   text-align: left;

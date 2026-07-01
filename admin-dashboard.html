@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#152238">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=49">
+  <link rel="stylesheet" href="css/styles.css?v=50">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
 <body>
@@ -123,57 +123,9 @@
       <section id="admin-success-section" hidden>
         <div class="admin-success-banner panel">
           <h1 class="admin-success-title">Successfully added</h1>
-          <p class="admin-success-text">Their listing is live. Copy the message below and send it to them by email or text.</p>
+          <p class="admin-success-text">Their listing is live. Send login details from Listings added by admin.</p>
           <p class="form-message is-error" id="success-warning" hidden></p>
-        </div>
-
-        <div class="admin-credentials panel">
-          <label class="field">
-            <span class="field-label">Message to send</span>
-            <textarea class="admin-handoff-message" id="success-message" rows="9" readonly></textarea>
-          </label>
-
-          <div class="admin-form-actions admin-success-actions">
-            <button type="button" class="btn-submit" id="admin-copy-all-btn">Copy message</button>
-          </div>
-
-          <h2 class="section-title">Login details</h2>
-
-          <label class="field">
-            <span class="field-label">Name</span>
-            <div class="admin-copy-row">
-              <input type="text" readonly id="success-name">
-              <button type="button" class="btn-secondary btn-small" data-copy-target="success-name">Copy</button>
-            </div>
-          </label>
-
-          <label class="field">
-            <span class="field-label">Email</span>
-            <div class="admin-copy-row">
-              <input type="text" readonly id="success-email">
-              <button type="button" class="btn-secondary btn-small" data-copy-target="success-email">Copy</button>
-            </div>
-          </label>
-
-          <label class="field">
-            <span class="field-label">Password</span>
-            <div class="admin-copy-row">
-              <input type="text" readonly id="success-password">
-              <button type="button" class="btn-secondary btn-small" data-copy-target="success-password">Copy</button>
-            </div>
-          </label>
-
-          <label class="field">
-            <span class="field-label">Phone</span>
-            <div class="admin-copy-row">
-              <input type="text" readonly id="success-phone">
-              <button type="button" class="btn-secondary btn-small" data-copy-target="success-phone">Copy</button>
-            </div>
-          </label>
-
-          <div class="admin-form-actions">
-            <button type="button" class="btn-secondary" id="admin-add-another-btn">Add another pilot car</button>
-          </div>
+          <button type="button" class="btn-secondary admin-success-back" id="admin-success-back-btn">Back</button>
         </div>
       </section>
 
@@ -181,7 +133,7 @@
         <div class="page-head">
           <p class="eyebrow">Admin</p>
           <h1 class="page-title">Listings added by admin</h1>
-          <p class="page-subtitle">Pilots waiting for login details. Remove each one after you’ve emailed them.</p>
+          <p class="page-subtitle">Tap Copy email for each pilot, send them their login info, then Remove when done.</p>
         </div>
 
         <div class="admin-handoffs-wrap">
@@ -203,13 +155,13 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=49"></script>
+  <script src="js/config.js?v=50"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=49"></script>
-  <script src="js/states.js?v=49"></script>
-  <script src="js/services.js?v=49"></script>
-  <script src="js/storage.js?v=49"></script>
-  <script src="js/auth.js?v=49"></script>
-  <script src="js/admin-dashboard.js?v=49"></script>
+  <script src="js/supabase-client.js?v=50"></script>
+  <script src="js/states.js?v=50"></script>
+  <script src="js/services.js?v=50"></script>
+  <script src="js/storage.js?v=50"></script>
+  <script src="js/auth.js?v=50"></script>
+  <script src="js/admin-dashboard.js?v=50"></script>
 </body>
 </html>

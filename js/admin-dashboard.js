@@ -33,14 +33,8 @@
   const servicesEl = document.getElementById('admin-services-checkboxes');
   const statesGrid = document.getElementById('admin-states-grid');
   const homeStateSelect = document.getElementById('admin-home-state');
-  const successName = document.getElementById('success-name');
-  const successEmail = document.getElementById('success-email');
-  const successPassword = document.getElementById('success-password');
-  const successPhone = document.getElementById('success-phone');
-  const successMessage = document.getElementById('success-message');
   const successWarning = document.getElementById('success-warning');
-  const copyAllBtn = document.getElementById('admin-copy-all-btn');
-  const addAnotherBtn = document.getElementById('admin-add-another-btn');
+  const successBackBtn = document.getElementById('admin-success-back-btn');
 
   LISTING_SERVICES.forEach((service) => {
     const label = document.createElement('label');
@@ -192,18 +186,7 @@
     return handoffs.find((row) => row.id === handoffId) || null;
   }
 
-  function fillSuccessView(result) {
-    const handoff = {
-      contactName: result.contactName,
-      loginEmail: result.email,
-      tempPassword: result.password,
-      phone: result.phone,
-    };
-    successName.value = result.contactName;
-    successEmail.value = result.email;
-    successPassword.value = result.password;
-    successPhone.value = result.phone;
-    successMessage.value = formatHandoffMessage(handoff);
+  function showSuccessView(result) {
     if (successWarning) {
       if (result.handoffWarning) {
         successWarning.textContent = result.handoffWarning;
@@ -321,7 +304,7 @@
         },
       });
 
-      fillSuccessView(result);
+      showSuccessView(result);
       showView('success');
     } catch (err) {
       showMessage(err.message, true);
@@ -331,22 +314,11 @@
     }
   });
 
-  document.querySelectorAll('[data-copy-target]').forEach((button) => {
-    button.addEventListener('click', () => {
-      const input = document.getElementById(button.dataset.copyTarget);
-      if (input) copyText(input.value, button);
+  if (successBackBtn) {
+    successBackBtn.addEventListener('click', () => {
+      showView('home');
     });
-  });
-
-  copyAllBtn.addEventListener('click', () => {
-    copyText(successMessage.value, copyAllBtn);
-  });
-
-  addAnotherBtn.addEventListener('click', () => {
-    resetForm();
-    showView('form');
-    form.contactName.focus();
-  });
+  }
 
   handoffsList.addEventListener('click', async (event) => {
     const copyBtn = event.target.closest('[data-copy-handoff]');
