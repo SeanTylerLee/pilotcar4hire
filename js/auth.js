@@ -1,5 +1,6 @@
 let cachedUser = null;
 let authReadyPromise = null;
+let adminOperationInProgress = false;
 
 function mapProfile(row) {
   if (!row) return null;
@@ -53,6 +54,7 @@ async function initAuth() {
       }
 
       supabase.auth.onAuthStateChange(async (_event, session) => {
+        if (adminOperationInProgress) return;
         if (!session?.user) {
           cachedUser = null;
           refreshNavUser();
@@ -182,7 +184,50 @@ function friendlyAuthError(message) {
   if (message.includes('User already registered')) {
     return 'An account with this email already exists.';
   }
+  if (message.includes('duplicate key') || message.includes('unique constraint')) {
+    return 'This email already has an account or listing.';
+  }
+  if (message.includes('row-level security')) {
+    return 'Permission denied. Log out and back in to admin, then try again.';
+  }
+  if (message.includes('foreign key') || message.includes('profiles')) {
+    return 'Account created but not ready yet. Wait a few seconds and try again.';
+  }
+  if (message.includes('added_by_admin')) {
+    return 'Database needs migration 002. Run it in Supabase SQL Editor.';
+  }
   return message;
+}
+
+async function waitForPilotProfile(userId) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (data?.id) return;
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  throw new Error('Account created but profile is not ready yet. Wait a moment and try again.');
+}
+
+async function restoreAdminSession(adminTokens) {
+  const { data, error } = await supabase.auth.setSession(adminTokens);
+  if (error) {
+    await supabase.auth.signOut();
+    throw new Error('Pilot saved. Log in to admin again to continue.');
+  }
+
+  const email = data.session?.user?.email;
+  if (!email || !isAdminEmail(email)) {
+    await supabase.auth.signOut();
+    throw new Error('Pilot saved. Log in to admin again to continue.');
+  }
+
+  return data.session;
 }
 
 async function getAdminSession() {
@@ -253,78 +298,87 @@ async function adminCreatePilot({ name, email, password, listing }) {
     throw new Error('Admin onboarding requires Supabase.');
   }
 
-  const { data: { session: adminSession } } = await supabase.auth.getSession();
-  if (!adminSession?.user?.email || !isAdminEmail(adminSession.user.email)) {
-    throw new Error('Admin session expired. Log in again.');
-  }
+  adminOperationInProgress = true;
 
-  const adminTokens = {
-    access_token: adminSession.access_token,
-    refresh_token: adminSession.refresh_token,
-  };
-
-  const { data, error } = await supabase.auth.signUp({
-    email: email.trim(),
-    password,
-    options: { data: { name: name.trim(), created_by_admin: true } },
-  });
-
-  if (error) throw new Error(friendlyAuthError(error.message));
-  if (!data.user) throw new Error('Account creation failed.');
-
-  if (!data.session) {
-    await supabase.auth.setSession(adminTokens);
-    throw new Error('Account created but email confirmation is on. Turn off “Confirm email” in Supabase → Authentication → Providers → Email.');
-  }
-
-  const payload = normalizeListing({ ...listing, userId: data.user.id });
-  const { error: listingError } = await supabase.from('listings').insert({
-    user_id: data.user.id,
-    business_name: payload.businessName,
-    years_experience: payload.yearsExperience,
-    phone: payload.phone,
-    email: payload.email,
-    services: payload.services,
-    states_certified: payload.statesCertified,
-    home_state: payload.homeState,
-    home_city: payload.homeCity,
-    description: payload.description || '',
-    added_by_admin: true,
-  });
-
-  if (listingError) {
-    await supabase.auth.setSession(adminTokens);
-    throw new Error(listingError.message);
-  }
-
-  const { error: sessionError } = await supabase.auth.setSession(adminTokens);
-  if (sessionError) {
-    throw new Error('Listing saved but admin session expired. Log in again to continue.');
-  }
-
-  let handoffId = null;
   try {
-    const handoff = await saveAdminPilotHandoff({
+    const { data: { session: adminSession } } = await supabase.auth.getSession();
+    if (!adminSession?.user?.email || !isAdminEmail(adminSession.user.email)) {
+      throw new Error('Admin session expired. Log in again.');
+    }
+
+    const adminTokens = {
+      access_token: adminSession.access_token,
+      refresh_token: adminSession.refresh_token,
+    };
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { name: name.trim(), created_by_admin: true } },
+    });
+
+    if (error) throw new Error(friendlyAuthError(error.message));
+    if (!data.user) throw new Error('Account creation failed.');
+
+    if (!data.session) {
+      await restoreAdminSession(adminTokens);
+      throw new Error('Account created but email confirmation is on. Turn off “Confirm email” in Supabase → Authentication → Providers → Email.');
+    }
+
+    await waitForPilotProfile(data.user.id);
+
+    const payload = normalizeListing({ ...listing, userId: data.user.id });
+    const { error: listingError } = await supabase.from('listings').insert({
+      user_id: data.user.id,
+      business_name: payload.businessName,
+      years_experience: payload.yearsExperience,
+      phone: payload.phone,
+      email: payload.email,
+      services: payload.services,
+      states_certified: payload.statesCertified,
+      home_state: payload.homeState,
+      home_city: payload.homeCity,
+      description: payload.description || '',
+      added_by_admin: true,
+    });
+
+    if (listingError) {
+      await restoreAdminSession(adminTokens);
+      throw new Error(friendlyAuthError(listingError.message));
+    }
+
+    await restoreAdminSession(adminTokens);
+
+    let handoffId = null;
+    let handoffWarning = null;
+    try {
+      const handoff = await saveAdminPilotHandoff({
+        userId: data.user.id,
+        contactName: name.trim(),
+        loginEmail: email.trim(),
+        tempPassword: password,
+        phone: payload.phone,
+      });
+      handoffId = handoff.id;
+    } catch (err) {
+      handoffWarning = err.message.includes('admin_pilot_handoffs')
+        ? 'Pilot saved but admin list needs migration 003 in Supabase.'
+        : `Pilot saved but not added to your admin list: ${err.message}`;
+    }
+
+    return {
+      email: email.trim(),
+      password,
       userId: data.user.id,
       contactName: name.trim(),
-      loginEmail: email.trim(),
-      tempPassword: password,
       phone: payload.phone,
-    });
-    handoffId = handoff.id;
-  } catch {
-    /* listing is live — success screen still shows credentials */
+      handoffId,
+      handoffWarning,
+    };
+  } finally {
+    adminOperationInProgress = false;
+    cachedUser = null;
   }
-
-  cachedUser = null;
-  return {
-    email: email.trim(),
-    password,
-    userId: data.user.id,
-    contactName: name.trim(),
-    phone: payload.phone,
-    handoffId,
-  };
 }
 
 function refreshNavUser() {

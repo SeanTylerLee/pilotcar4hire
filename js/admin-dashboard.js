@@ -1,4 +1,4 @@
-runWhenReady(async () => {
+(async function initAdminDashboard() {
   let admin;
   try {
     admin = await getAdminSession();
@@ -37,6 +37,7 @@ runWhenReady(async () => {
   const successPassword = document.getElementById('success-password');
   const successPhone = document.getElementById('success-phone');
   const successMessage = document.getElementById('success-message');
+  const successWarning = document.getElementById('success-warning');
   const copyAllBtn = document.getElementById('admin-copy-all-btn');
   const addAnotherBtn = document.getElementById('admin-add-another-btn');
 
@@ -219,6 +220,15 @@ runWhenReady(async () => {
     successPassword.value = result.password;
     successPhone.value = result.phone;
     successMessage.value = formatHandoffMessage(handoff);
+    if (successWarning) {
+      if (result.handoffWarning) {
+        successWarning.textContent = result.handoffWarning;
+        successWarning.hidden = false;
+      } else {
+        successWarning.hidden = true;
+        successWarning.textContent = '';
+      }
+    }
   }
 
   showView('home');
@@ -290,8 +300,16 @@ runWhenReady(async () => {
       return;
     }
 
+    const yearsExperience = Number(form.yearsExperience.value);
+    if (!Number.isFinite(yearsExperience) || yearsExperience < 0) {
+      showMessage('Enter a valid years of experience.', true);
+      return;
+    }
+
     const submitBtn = form.querySelector('button[type="submit"]');
+    const submitLabel = submitBtn.textContent;
     submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
 
     try {
       const loginEmail = form.loginEmail.value.trim();
@@ -302,7 +320,7 @@ runWhenReady(async () => {
         password,
         listing: {
           businessName: form.businessName.value.trim(),
-          yearsExperience: Number(form.yearsExperience.value),
+          yearsExperience,
           phone: form.phone.value.trim(),
           email: form.email.value.trim(),
           services,
@@ -319,6 +337,7 @@ runWhenReady(async () => {
       showMessage(err.message, true);
     } finally {
       submitBtn.disabled = false;
+      submitBtn.textContent = submitLabel;
     }
   });
 
@@ -365,4 +384,4 @@ runWhenReady(async () => {
       removeBtn.disabled = false;
     }
   });
-});
+})();
