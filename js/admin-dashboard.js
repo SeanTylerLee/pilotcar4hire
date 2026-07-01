@@ -33,6 +33,8 @@
   const servicesEl = document.getElementById('admin-services-checkboxes');
   const statesCertGrid = document.getElementById('admin-states-cert-grid');
   const statesOtherGrid = document.getElementById('admin-states-other-grid');
+  const statesSelectAllBtn = document.getElementById('admin-states-select-all');
+  const statesClearAllBtn = document.getElementById('admin-states-clear-all');
   const homeStateSelect = document.getElementById('admin-home-state');
   const successWarning = document.getElementById('success-warning');
   const successBackBtn = document.getElementById('admin-success-back-btn');
@@ -66,6 +68,15 @@
     option.textContent = `${code} — ${getStateName(code)}`;
     homeStateSelect.appendChild(option);
   });
+
+  function setAllStatesChecked(checked) {
+    form.querySelectorAll('input[name="statesCertified"]').forEach((el) => {
+      el.checked = checked;
+    });
+  }
+
+  statesSelectAllBtn.addEventListener('click', () => setAllStatesChecked(true));
+  statesClearAllBtn.addEventListener('click', () => setAllStatesChecked(false));
 
   function showMessage(text, isError) {
     formMessage.textContent = text;
