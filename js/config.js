@@ -1,5 +1,8 @@
 // Bump when shipping frontend changes (shown in footer).
-window.SITE_VERSION = 'v51';
+window.SITE_VERSION = 'v53';
+
+// Public contact email (footer, reports, schema.org).
+window.SITE_CONTACT_EMAIL = 'team@pilotcar4hire.com';
 
 // Set to true while building the frontend (no Supabase required).
 // Set to false when Supabase is configured and ready.

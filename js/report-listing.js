@@ -1,4 +1,4 @@
-const REPORT_EMAIL = 'support@pilotcar4hire.com';
+const REPORT_EMAIL = window.SITE_CONTACT_EMAIL || 'team@pilotcar4hire.com';
 
 function buildReportMailto(listing) {
   const data = normalizeListing(listing);

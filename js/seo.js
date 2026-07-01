@@ -91,6 +91,7 @@ function organizationSchema() {
     url: SITE_ORIGIN,
     logo: absoluteUrl('/images/logo.svg'),
     description: 'Free nationwide pilot car directory to find certified escorts for oversize and heavy haul loads.',
+    email: window.SITE_CONTACT_EMAIL || 'team@pilotcar4hire.com',
   };
 }
 
