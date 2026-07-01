@@ -2417,6 +2417,41 @@ button { font-family: inherit; }
   overflow: hidden;
 }
 
+.admin-handoffs-wrap {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-handoffs-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-handoff-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-handoff-fields {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.admin-handoff-field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.admin-handoff-value {
+  font-size: 0.9375rem;
+  color: var(--navy);
+  word-break: break-word;
+}
+
+.admin-handoff-remove {
+  color: var(--slate);
+}
+
 .admin-listings-status {
   padding: 1.25rem 1.5rem;
   margin: 0;

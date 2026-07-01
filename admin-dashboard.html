@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#152238">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=40">
+  <link rel="stylesheet" href="css/styles.css?v=41">
   <link rel="icon" href="images/logo.svg" type="image/svg+xml">
 </head>
 <body>
@@ -121,13 +121,21 @@
       <section id="admin-success-section" hidden>
         <div class="page-head">
           <p class="eyebrow">Saved</p>
-          <h1 class="page-title">Listing is live</h1>
-          <p class="page-subtitle">Text or email these login details so they can update their listing later.</p>
+          <h1 class="page-title">Successfully added</h1>
+          <p class="page-subtitle">Copy and email this info so they can log in later. It’s also saved under Listings added by admin.</p>
         </div>
 
         <div class="admin-credentials panel">
           <label class="field">
-            <span class="field-label">Login email</span>
+            <span class="field-label">Name</span>
+            <div class="admin-copy-row">
+              <input type="text" readonly id="success-name">
+              <button type="button" class="btn-secondary btn-small" data-copy-target="success-name">Copy</button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Email</span>
             <div class="admin-copy-row">
               <input type="text" readonly id="success-email">
               <button type="button" class="btn-secondary btn-small" data-copy-target="success-email">Copy</button>
@@ -142,10 +150,16 @@
             </div>
           </label>
 
-          <p class="admin-login-hint">They can log in at <strong>pilotcar4hire.com</strong> → Log in → My listing.</p>
+          <label class="field">
+            <span class="field-label">Phone</span>
+            <div class="admin-copy-row">
+              <input type="text" readonly id="success-phone">
+              <button type="button" class="btn-secondary btn-small" data-copy-target="success-phone">Copy</button>
+            </div>
+          </label>
 
           <div class="admin-form-actions">
-            <button type="button" class="btn-secondary" id="admin-copy-all-btn">Copy email &amp; password</button>
+            <button type="button" class="btn-secondary" id="admin-copy-all-btn">Copy all info</button>
             <button type="button" class="btn-submit" id="admin-add-another-btn">Add another pilot car</button>
           </div>
         </div>
@@ -155,27 +169,14 @@
         <div class="page-head">
           <p class="eyebrow">Admin</p>
           <h1 class="page-title">Listings added by admin</h1>
+          <p class="page-subtitle">Pilots waiting for login details. Remove each one after you’ve emailed them.</p>
         </div>
 
-        <div class="panel admin-listings-panel">
+        <div class="admin-handoffs-wrap">
           <p class="admin-listings-status" id="admin-listings-loading">Loading…</p>
-          <p class="admin-listings-status" id="admin-listings-empty" hidden>No listings added yet.</p>
+          <p class="admin-listings-status" id="admin-listings-empty" hidden>No pilots waiting. Everyone you’ve added has been emailed.</p>
           <p class="form-message is-error" id="admin-listings-error" hidden></p>
-          <div class="admin-table-scroll" id="admin-listings-table-wrap" hidden>
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Contact</th>
-                  <th>Business</th>
-                  <th>Login email</th>
-                  <th>Phone</th>
-                  <th>Location</th>
-                  <th>Added</th>
-                </tr>
-              </thead>
-              <tbody id="admin-listings-tbody"></tbody>
-            </table>
-          </div>
+          <div class="admin-handoffs-list" id="admin-handoffs-list" hidden></div>
         </div>
 
         <button type="button" class="btn-secondary admin-listings-back" id="admin-listings-back-btn">Back</button>
@@ -190,13 +191,13 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=40"></script>
+  <script src="js/config.js?v=41"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=40"></script>
-  <script src="js/states.js?v=40"></script>
-  <script src="js/services.js?v=40"></script>
-  <script src="js/storage.js?v=40"></script>
-  <script src="js/auth.js?v=40"></script>
-  <script src="js/admin-dashboard.js?v=40"></script>
+  <script src="js/supabase-client.js?v=41"></script>
+  <script src="js/states.js?v=41"></script>
+  <script src="js/services.js?v=41"></script>
+  <script src="js/storage.js?v=41"></script>
+  <script src="js/auth.js?v=41"></script>
+  <script src="js/admin-dashboard.js?v=41"></script>
 </body>
 </html>

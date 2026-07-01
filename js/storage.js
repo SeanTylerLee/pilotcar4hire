@@ -1,4 +1,25 @@
 const LISTINGS_KEY = 'pc4h_listings';
+const ADMIN_HANDOFFS_KEY = 'pc4h_admin_handoffs';
+
+function mapHandoffRow(row) {
+  return {
+    id: row.id,
+    userId: row.user_id || row.userId,
+    contactName: row.contact_name || row.contactName,
+    loginEmail: row.login_email || row.loginEmail,
+    tempPassword: row.temp_password || row.tempPassword,
+    phone: row.phone,
+    createdAt: row.created_at ? new Date(row.created_at).getTime() : row.createdAt,
+  };
+}
+
+function getLocalAdminHandoffs() {
+  return JSON.parse(localStorage.getItem(ADMIN_HANDOFFS_KEY) || '[]').map(mapHandoffRow);
+}
+
+function saveLocalAdminHandoffs(handoffs) {
+  localStorage.setItem(ADMIN_HANDOFFS_KEY, JSON.stringify(handoffs));
+}
 
 function generateId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -123,22 +144,65 @@ async function getAllListingsWithUsers() {
   return (data || []).map(mapListingRow);
 }
 
-async function getAdminAddedListings() {
+async function getAdminPilotHandoffs() {
   if (useLocalDev()) {
-    return getLocalListings()
-      .filter((l) => l.addedByAdmin)
-      .map(withDevUser)
-      .sort((a, b) => (b.createdAt || b.updatedAt || 0) - (a.createdAt || a.updatedAt || 0));
+    return getLocalAdminHandoffs()
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }
 
   const { data, error } = await supabase
-    .from('listings')
-    .select('*, profiles(name, email, created_at)')
-    .eq('added_by_admin', true)
-    .order('updated_at', { ascending: false });
+    .from('admin_pilot_handoffs')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data || []).map(mapListingRow);
+  return (data || []).map(mapHandoffRow);
+}
+
+async function saveAdminPilotHandoff(handoff) {
+  const payload = {
+    user_id: handoff.userId,
+    contact_name: handoff.contactName,
+    login_email: handoff.loginEmail,
+    temp_password: handoff.tempPassword,
+    phone: handoff.phone,
+  };
+
+  if (useLocalDev()) {
+    const handoffs = getLocalAdminHandoffs();
+    const saved = {
+      ...mapHandoffRow(payload),
+      id: handoff.id || generateId(),
+      userId: handoff.userId,
+      createdAt: Date.now(),
+    };
+    handoffs.push(saved);
+    saveLocalAdminHandoffs(handoffs);
+    return saved;
+  }
+
+  const { data, error } = await supabase
+    .from('admin_pilot_handoffs')
+    .insert(payload)
+    .select('*')
+    .single();
+
+  if (error) throw new Error(error.message);
+  return mapHandoffRow(data);
+}
+
+async function removeAdminPilotHandoff(handoffId) {
+  if (useLocalDev()) {
+    saveLocalAdminHandoffs(getLocalAdminHandoffs().filter((row) => row.id !== handoffId));
+    return;
+  }
+
+  const { error } = await supabase
+    .from('admin_pilot_handoffs')
+    .delete()
+    .eq('id', handoffId);
+
+  if (error) throw new Error(error.message);
 }
 
 async function deleteListingByUserId(userId) {

@@ -16,8 +16,7 @@ runWhenReady(async () => {
   const listingsLoading = document.getElementById('admin-listings-loading');
   const listingsEmpty = document.getElementById('admin-listings-empty');
   const listingsError = document.getElementById('admin-listings-error');
-  const listingsTableWrap = document.getElementById('admin-listings-table-wrap');
-  const listingsTbody = document.getElementById('admin-listings-tbody');
+  const handoffsList = document.getElementById('admin-handoffs-list');
   const cancelBtn = document.getElementById('admin-cancel-btn');
   const form = document.getElementById('admin-listing-form');
   const formMessage = document.getElementById('admin-form-message');
@@ -26,8 +25,10 @@ runWhenReady(async () => {
   const servicesEl = document.getElementById('admin-services-checkboxes');
   const statesGrid = document.getElementById('admin-states-grid');
   const homeStateSelect = document.getElementById('admin-home-state');
+  const successName = document.getElementById('success-name');
   const successEmail = document.getElementById('success-email');
   const successPassword = document.getElementById('success-password');
+  const successPhone = document.getElementById('success-phone');
   const copyAllBtn = document.getElementById('admin-copy-all-btn');
   const addAnotherBtn = document.getElementById('admin-add-another-btn');
 
@@ -64,15 +65,6 @@ runWhenReady(async () => {
     listingsSection.hidden = view !== 'listings';
   }
 
-  function formatAddedDate(timestamp) {
-    if (!timestamp) return '—';
-    return new Date(timestamp).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-
   function escapeHtml(text) {
     return String(text)
       .replace(/&/g, '&amp;')
@@ -81,41 +73,73 @@ runWhenReady(async () => {
       .replace(/"/g, '&quot;');
   }
 
-  function renderAdminListings(listings) {
-    listingsTbody.innerHTML = listings.map((listing) => `
-      <tr>
-        <td>${escapeHtml(listing.userName || '—')}</td>
-        <td>${escapeHtml(listing.businessName || '—')}</td>
-        <td>${escapeHtml(listing.userEmail || listing.email || '—')}</td>
-        <td>${escapeHtml(listing.phone || '—')}</td>
-        <td>${escapeHtml([listing.homeCity, listing.homeState].filter(Boolean).join(', ') || '—')}</td>
-        <td>${escapeHtml(formatAddedDate(listing.createdAt || listing.updatedAt))}</td>
-      </tr>
-    `).join('');
+  function formatHandoffMessage(handoff) {
+    return [
+      'Pilot Car 4 Hire login',
+      `Name: ${handoff.contactName}`,
+      `Email: ${handoff.loginEmail}`,
+      `Password: ${handoff.tempPassword}`,
+      `Phone: ${handoff.phone}`,
+      'Log in at pilotcar4hire.com',
+    ].join('\n');
   }
 
-  async function loadAdminListings() {
+  function renderHandoffCard(handoff) {
+    return `
+      <article class="admin-handoff-card panel" data-handoff-id="${escapeHtml(handoff.id)}">
+        <div class="admin-handoff-fields">
+          <div class="admin-handoff-field">
+            <span class="field-label">Name</span>
+            <span class="admin-handoff-value">${escapeHtml(handoff.contactName)}</span>
+          </div>
+          <div class="admin-handoff-field">
+            <span class="field-label">Email</span>
+            <span class="admin-handoff-value">${escapeHtml(handoff.loginEmail)}</span>
+          </div>
+          <div class="admin-handoff-field">
+            <span class="field-label">Password</span>
+            <span class="admin-handoff-value">${escapeHtml(handoff.tempPassword)}</span>
+          </div>
+          <div class="admin-handoff-field">
+            <span class="field-label">Phone</span>
+            <span class="admin-handoff-value">${escapeHtml(handoff.phone)}</span>
+          </div>
+        </div>
+        <div class="admin-form-actions">
+          <button type="button" class="btn-secondary btn-small" data-copy-handoff="${escapeHtml(handoff.id)}">Copy all info</button>
+          <button type="button" class="btn-secondary btn-small admin-handoff-remove" data-remove-handoff="${escapeHtml(handoff.id)}">Remove</button>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderAdminHandoffs(handoffs) {
+    handoffsList.innerHTML = handoffs.map(renderHandoffCard).join('');
+    handoffsList.dataset.handoffs = JSON.stringify(handoffs);
+  }
+
+  async function loadAdminHandoffs() {
     listingsLoading.hidden = false;
     listingsEmpty.hidden = true;
     listingsError.hidden = true;
-    listingsTableWrap.hidden = true;
-    listingsTbody.innerHTML = '';
+    handoffsList.hidden = true;
+    handoffsList.innerHTML = '';
 
     try {
-      const listings = await getAdminAddedListings();
+      const handoffs = await getAdminPilotHandoffs();
       listingsLoading.hidden = true;
 
-      if (listings.length === 0) {
+      if (handoffs.length === 0) {
         listingsEmpty.hidden = false;
         return;
       }
 
-      renderAdminListings(listings);
-      listingsTableWrap.hidden = false;
+      renderAdminHandoffs(handoffs);
+      handoffsList.hidden = false;
     } catch (err) {
       listingsLoading.hidden = true;
-      listingsError.textContent = err.message.includes('added_by_admin')
-        ? 'Database needs an update. Run supabase/migrations/002_admin_added_listings.sql in Supabase SQL Editor.'
+      listingsError.textContent = err.message.includes('admin_pilot_handoffs')
+        ? 'Database needs an update. Run supabase/migrations/003_admin_pilot_handoffs.sql in Supabase SQL Editor.'
         : err.message;
       listingsError.hidden = false;
     }
@@ -164,6 +188,18 @@ runWhenReady(async () => {
     }
   }
 
+  function getHandoffById(handoffId) {
+    const handoffs = JSON.parse(handoffsList.dataset.handoffs || '[]');
+    return handoffs.find((row) => row.id === handoffId) || null;
+  }
+
+  function fillSuccessView(result) {
+    successName.value = result.contactName;
+    successEmail.value = result.email;
+    successPassword.value = result.password;
+    successPhone.value = result.phone;
+  }
+
   showView('home');
 
   if (logoutBtn) logoutBtn.addEventListener('click', adminLogout);
@@ -176,7 +212,7 @@ runWhenReady(async () => {
 
   listingsBtn.addEventListener('click', () => {
     showView('listings');
-    loadAdminListings();
+    loadAdminHandoffs();
   });
 
   listingsBackBtn.addEventListener('click', () => {
@@ -256,8 +292,7 @@ runWhenReady(async () => {
         },
       });
 
-      successEmail.value = result.email;
-      successPassword.value = result.password;
+      fillSuccessView(result);
       showView('success');
     } catch (err) {
       showMessage(err.message, true);
@@ -274,13 +309,44 @@ runWhenReady(async () => {
   });
 
   copyAllBtn.addEventListener('click', () => {
-    const text = `Pilot Car 4 Hire login\nEmail: ${successEmail.value}\nPassword: ${successPassword.value}\nLog in at pilotcar4hire.com`;
-    copyText(text, copyAllBtn);
+    copyText(formatHandoffMessage({
+      contactName: successName.value,
+      loginEmail: successEmail.value,
+      tempPassword: successPassword.value,
+      phone: successPhone.value,
+    }), copyAllBtn);
   });
 
   addAnotherBtn.addEventListener('click', () => {
     resetForm();
     showView('form');
     form.contactName.focus();
+  });
+
+  handoffsList.addEventListener('click', async (event) => {
+    const copyBtn = event.target.closest('[data-copy-handoff]');
+    if (copyBtn) {
+      const handoff = getHandoffById(copyBtn.dataset.copyHandoff);
+      if (handoff) copyText(formatHandoffMessage(handoff), copyBtn);
+      return;
+    }
+
+    const removeBtn = event.target.closest('[data-remove-handoff]');
+    if (!removeBtn) return;
+
+    const handoffId = removeBtn.dataset.removeHandoff;
+    if (!window.confirm('Remove this pilot from your list? Their listing stays live on the site.')) {
+      return;
+    }
+
+    removeBtn.disabled = true;
+    try {
+      await removeAdminPilotHandoff(handoffId);
+      await loadAdminHandoffs();
+    } catch (err) {
+      listingsError.textContent = err.message;
+      listingsError.hidden = false;
+      removeBtn.disabled = false;
+    }
   });
 });
