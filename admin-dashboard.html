@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#152238">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=62">
+  <link rel="stylesheet" href="css/styles.css?v=63">
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="images/favicon-16.png" type="image/png" sizes="16x16">
@@ -35,31 +35,33 @@
         <button type="button" class="btn-secondary admin-form-back" id="admin-form-back-btn">Back</button>
 
         <div class="page-head">
-          <p class="eyebrow">New listing</p>
-          <h1 class="page-title">Pilot car intake</h1>
-          <p class="page-subtitle">Enter what they give you on the call. A login is created automatically when you save.</p>
+          <p class="eyebrow" id="admin-form-eyebrow">New listing</p>
+          <h1 class="page-title" id="admin-form-title">Pilot car intake</h1>
+          <p class="page-subtitle" id="admin-form-subtitle">Enter what they give you on the call. A login is created automatically when you save.</p>
         </div>
 
         <form class="listing-form panel" id="admin-listing-form">
-          <h2 class="section-title">Account (for later login)</h2>
+          <div id="admin-account-fields">
+            <h2 class="section-title">Account (for later login)</h2>
 
-          <label class="field">
-            <span class="field-label">Contact name</span>
-            <input type="text" name="contactName" required placeholder="Name they go by">
-          </label>
+            <label class="field">
+              <span class="field-label">Contact name</span>
+              <input type="text" name="contactName" required placeholder="Name they go by">
+            </label>
 
-          <label class="field">
-            <span class="field-label">Login email</span>
-            <input type="email" name="loginEmail" required autocomplete="off" placeholder="email they want to use">
-          </label>
+            <label class="field">
+              <span class="field-label">Login email</span>
+              <input type="email" name="loginEmail" required autocomplete="off" placeholder="email they want to use">
+            </label>
 
-          <label class="field">
-            <span class="field-label">Temporary password</span>
-            <div class="admin-password-row">
-              <input type="text" name="loginPassword" required autocomplete="new-password" minlength="6" id="admin-login-password" readonly>
-              <button type="button" class="btn-secondary btn-small" id="admin-regen-password">New password</button>
-            </div>
-          </label>
+            <label class="field">
+              <span class="field-label">Temporary password</span>
+              <div class="admin-password-row">
+                <input type="text" name="loginPassword" required autocomplete="new-password" minlength="6" id="admin-login-password" readonly>
+                <button type="button" class="btn-secondary btn-small" id="admin-regen-password">New password</button>
+              </div>
+            </label>
+          </div>
 
           <h2 class="section-title">Listing (what carriers see)</h2>
 
@@ -126,7 +128,7 @@
 
           <div class="admin-form-actions">
             <button type="button" class="btn-secondary" id="admin-cancel-btn">Cancel</button>
-            <button type="submit" class="btn-submit">Save listing &amp; create account</button>
+            <button type="submit" class="btn-submit" id="admin-form-submit">Save listing &amp; create account</button>
           </div>
         </form>
       </section>
@@ -192,14 +194,14 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=62"></script>
-  <script src="js/sw-register.js?v=62"></script>
+  <script src="js/config.js?v=63"></script>
+  <script src="js/sw-register.js?v=63"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=62"></script>
-  <script src="js/states.js?v=62"></script>
-  <script src="js/services.js?v=62"></script>
-  <script src="js/storage.js?v=62"></script>
-  <script src="js/auth.js?v=62"></script>
-  <script src="js/admin-dashboard.js?v=62"></script>
+  <script src="js/supabase-client.js?v=63"></script>
+  <script src="js/states.js?v=63"></script>
+  <script src="js/services.js?v=63"></script>
+  <script src="js/storage.js?v=63"></script>
+  <script src="js/auth.js?v=63"></script>
+  <script src="js/admin-dashboard.js?v=63"></script>
 </body>
 </html>

@@ -48,9 +48,16 @@
   const homeStateSelect = document.getElementById('admin-home-state');
   const successWarning = document.getElementById('success-warning');
   const successBackBtn = document.getElementById('admin-success-back-btn');
+  const accountFields = document.getElementById('admin-account-fields');
+  const formEyebrow = document.getElementById('admin-form-eyebrow');
+  const formTitle = document.getElementById('admin-form-title');
+  const formSubtitle = document.getElementById('admin-form-subtitle');
+  const formSubmitBtn = document.getElementById('admin-form-submit');
 
   let allPilots = [];
   let handoffByUserId = new Map();
+  let formMode = 'create';
+  let editingPilot = null;
 
   LISTING_SERVICES.forEach((service) => {
     const label = document.createElement('label');
@@ -163,11 +170,13 @@
           <div><dt>Based in</dt><dd>${escapeHtml(formatHomeLocation(listing.homeCity, listing.homeState) || '—')}</dd></div>
         </dl>
       `
-      : '<p class="admin-pilot-missing">Signed up but never finished a listing. Call or email them and walk them through it, or add the listing yourself from intake.</p>';
+      : '<p class="admin-pilot-missing">Signed up but never finished a listing. Use Complete listing to fill it in for them.</p>';
 
     const passwordHtml = handoff?.tempPassword
       ? `<p class="admin-pilot-password"><strong>Temp password on file:</strong> ${escapeHtml(handoff.tempPassword)} <span class="admin-pilot-password-note">(from when you added them)</span></p>`
       : '<p class="admin-pilot-password-note">Password can’t be viewed. Use Send reset email if they forgot it.</p>';
+
+    const editLabel = listing ? 'Edit listing' : 'Complete listing';
 
     return `
       <article class="admin-pilot-card panel" data-pilot-id="${escapeHtml(pilot.id)}">
@@ -182,6 +191,7 @@
         ${listingHtml}
         ${passwordHtml}
         <div class="admin-pilot-actions">
+          <button type="button" class="btn-submit btn-small" data-edit-pilot="${escapeHtml(pilot.id)}">${editLabel}</button>
           <button type="button" class="btn-secondary btn-small" data-copy-pilot-email="${escapeHtml(pilot.email || '')}">Copy email</button>
           <button type="button" class="btn-secondary btn-small" data-reset-pilot="${escapeHtml(pilot.email || '')}">Send reset email</button>
           ${handoff?.tempPassword ? `<button type="button" class="btn-secondary btn-small" data-copy-pilot-password="${escapeHtml(handoff.tempPassword)}">Copy temp password</button>` : ''}
@@ -311,6 +321,87 @@
     form.querySelectorAll('input[name="services"], input[name="statesCertified"]').forEach((el) => {
       el.checked = false;
     });
+    delete form.loginEmail.dataset.lastSynced;
+  }
+
+  function setCreateFormMode() {
+    formMode = 'create';
+    editingPilot = null;
+    if (accountFields) accountFields.hidden = false;
+    form.contactName.required = true;
+    form.loginEmail.required = true;
+    form.loginPassword.required = true;
+    if (formEyebrow) formEyebrow.textContent = 'New listing';
+    if (formTitle) formTitle.textContent = 'Pilot car intake';
+    if (formSubtitle) {
+      formSubtitle.textContent = 'Enter what they give you on the call. A login is created automatically when you save.';
+    }
+    if (formSubmitBtn) formSubmitBtn.textContent = 'Save listing & create account';
+  }
+
+  function setEditFormMode(pilot) {
+    formMode = 'edit';
+    editingPilot = pilot;
+    if (accountFields) accountFields.hidden = true;
+    form.contactName.required = false;
+    form.loginEmail.required = false;
+    form.loginPassword.required = false;
+
+    const hasListing = Boolean(pilot.listing);
+    if (formEyebrow) formEyebrow.textContent = hasListing ? 'Edit listing' : 'Complete listing';
+    if (formTitle) {
+      formTitle.textContent = hasListing
+        ? `Edit ${pilot.name || 'listing'}`
+        : `Complete listing for ${pilot.name || 'pilot'}`;
+    }
+    if (formSubtitle) {
+      formSubtitle.textContent = `Account: ${pilot.email || '—'}. Fill in what carriers should see, then save.`;
+    }
+    if (formSubmitBtn) {
+      formSubmitBtn.textContent = hasListing ? 'Save listing' : 'Save & publish listing';
+    }
+  }
+
+  function fillListingFields(pilot) {
+    const listing = pilot.listing || {};
+    form.businessName.value = listing.businessName || pilot.name || '';
+    form.yearsExperience.value = listing.yearsExperience ?? '';
+    form.phone.value = listing.phone || '';
+    form.email.value = listing.email || pilot.email || '';
+    form.homeCity.value = listing.homeCity || '';
+    form.homeState.value = listing.homeState || '';
+    form.description.value = listing.description || '';
+
+    form.querySelectorAll('input[name="services"]').forEach((input) => {
+      input.checked = (listing.services || []).includes(input.value);
+    });
+    form.querySelectorAll('input[name="statesCertified"]').forEach((input) => {
+      input.checked = (listing.statesCertified || []).includes(input.value);
+    });
+  }
+
+  function openEditPilot(pilotId) {
+    const pilot = allPilots.find((row) => row.id === pilotId);
+    if (!pilot) {
+      showPilotsBanner('Could not find that pilot.', true);
+      return;
+    }
+    resetForm();
+    setEditFormMode(pilot);
+    fillListingFields(pilot);
+    showView('form');
+    form.businessName.focus();
+  }
+
+  function leaveForm() {
+    if (formMode === 'edit') {
+      setCreateFormMode();
+      showView('pilots');
+      loadAllPilots();
+      return;
+    }
+    setCreateFormMode();
+    showView('home');
   }
 
   function getSelectedServices() {
@@ -357,6 +448,7 @@
 
   startBtn.addEventListener('click', () => {
     resetForm();
+    setCreateFormMode();
     showView('form');
     form.contactName.focus();
   });
@@ -386,14 +478,10 @@
     pilotsSearch.addEventListener('input', renderPilotsList);
   }
 
-  cancelBtn.addEventListener('click', () => {
-    showView('home');
-  });
+  cancelBtn.addEventListener('click', leaveForm);
 
   if (formBackBtn) {
-    formBackBtn.addEventListener('click', () => {
-      showView('home');
-    });
+    formBackBtn.addEventListener('click', leaveForm);
   }
 
   regenPasswordBtn.addEventListener('click', () => {
@@ -430,53 +518,83 @@
       return;
     }
 
-    const contactName = form.contactName.value.trim();
-    if (!contactName) {
-      showMessage('Enter a contact name.', true);
-      return;
-    }
-
-    const password = form.loginPassword.value;
-    if (!password) {
-      showMessage('Enter a contact name to generate a password.', true);
-      return;
-    }
-
     const yearsExperience = Number(form.yearsExperience.value);
     if (!Number.isFinite(yearsExperience) || yearsExperience < 0) {
       showMessage('Enter a valid years of experience.', true);
       return;
     }
 
-    const submitBtn = form.querySelector('button[type="submit"]');
+    const listingPayload = {
+      businessName: form.businessName.value.trim(),
+      yearsExperience,
+      phone: form.phone.value.trim(),
+      email: form.email.value.trim(),
+      services,
+      statesCertified,
+      homeState: form.homeState.value,
+      homeCity: form.homeCity.value.trim(),
+      description: form.description.value.trim(),
+    };
+
+    const submitBtn = formSubmitBtn || form.querySelector('button[type="submit"]');
     const submitLabel = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving…';
 
     try {
-      const loginEmail = form.loginEmail.value.trim();
+      if (formMode === 'edit') {
+        if (!editingPilot?.id) {
+          throw new Error('Missing pilot account.');
+        }
+        await adminUpsertListingForUser(editingPilot.id, {
+          ...listingPayload,
+          id: editingPilot.listing?.id,
+          addedByAdmin: editingPilot.listing?.addedByAdmin ?? true,
+        });
+        showPilotsBanner(
+          editingPilot.listing
+            ? `Updated listing for ${editingPilot.name || editingPilot.email}.`
+            : `Published listing for ${editingPilot.name || editingPilot.email}.`,
+          false,
+        );
+        setCreateFormMode();
+        showView('pilots');
+        await loadAllPilots();
+        return;
+      }
 
+      const contactName = form.contactName.value.trim();
+      if (!contactName) {
+        showMessage('Enter a contact name.', true);
+        return;
+      }
+
+      const password = form.loginPassword.value;
+      if (!password) {
+        showMessage('Enter a contact name to generate a password.', true);
+        return;
+      }
+
+      const loginEmail = form.loginEmail.value.trim();
       const result = await adminCreatePilot({
         name: contactName,
         email: loginEmail,
         password,
-        listing: {
-          businessName: form.businessName.value.trim(),
-          yearsExperience,
-          phone: form.phone.value.trim(),
-          email: form.email.value.trim(),
-          services,
-          statesCertified,
-          homeState: form.homeState.value,
-          homeCity: form.homeCity.value.trim(),
-          description: form.description.value.trim(),
-        },
+        listing: listingPayload,
       });
 
       showSuccessView(result);
       showView('success');
     } catch (err) {
-      showMessage(err.message, true);
+      const needsMigration = err.message.includes('row-level security')
+        || err.message.includes('permission')
+        || err.message.includes('RLS');
+      showMessage(
+        needsMigration && formMode === 'edit'
+          ? 'Database needs an update. Run supabase/migrations/004_admin_edit_listings.sql in Supabase SQL Editor.'
+          : err.message,
+        true,
+      );
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = submitLabel;
@@ -485,6 +603,7 @@
 
   if (successBackBtn) {
     successBackBtn.addEventListener('click', () => {
+      setCreateFormMode();
       showView('home');
     });
   }
@@ -517,6 +636,12 @@
   });
 
   pilotsList.addEventListener('click', async (event) => {
+    const editBtn = event.target.closest('[data-edit-pilot]');
+    if (editBtn) {
+      openEditPilot(editBtn.dataset.editPilot);
+      return;
+    }
+
     const copyEmailBtn = event.target.closest('[data-copy-pilot-email]');
     if (copyEmailBtn) {
       const email = copyEmailBtn.dataset.copyPilotEmail;

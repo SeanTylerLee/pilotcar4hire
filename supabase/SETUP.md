@@ -6,6 +6,12 @@ In [Supabase Dashboard](https://supabase.com/dashboard) → **PilotCar4Hire** �
 
 `supabase/migrations/001_initial_schema.sql`
 
+Then also run (in order) if you use admin tools:
+
+- `002_admin_added_listings.sql`
+- `003_admin_pilot_handoffs.sql`
+- `004_admin_edit_listings.sql` — lets admins edit/complete any pilot’s listing
+
 This creates `profiles` and `listings` tables, RLS policies, and a signup trigger.
 
 ## 2. Configure auth URLs

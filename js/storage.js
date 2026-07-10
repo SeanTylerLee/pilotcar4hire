@@ -117,6 +117,7 @@ async function upsertListing(listing) {
   };
 
   if (payload.id) row.id = payload.id;
+  if (payload.addedByAdmin != null) row.added_by_admin = payload.addedByAdmin;
 
   const { data, error } = await supabase
     .from('listings')
@@ -126,6 +127,15 @@ async function upsertListing(listing) {
 
   if (error) throw new Error(error.message);
   return mapListingRow(data);
+}
+
+async function adminUpsertListingForUser(userId, listing) {
+  if (!userId) throw new Error('Missing pilot account.');
+  return upsertListing({
+    ...listing,
+    userId,
+    addedByAdmin: listing.addedByAdmin ?? true,
+  });
 }
 
 async function getAllListingsWithUsers() {
