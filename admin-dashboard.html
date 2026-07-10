@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#152238">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=61">
+  <link rel="stylesheet" href="css/styles.css?v=62">
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="images/favicon-16.png" type="image/png" sizes="16x16">
@@ -26,6 +26,7 @@
       <section id="admin-home">
         <div class="admin-home-actions">
           <button type="button" class="btn-submit admin-start-btn" id="admin-start-btn">Add a pilot car listing</button>
+          <button type="button" class="btn-secondary admin-start-btn" id="admin-pilots-btn">All pilots &amp; help incomplete</button>
           <button type="button" class="btn-secondary admin-start-btn" id="admin-listings-btn">Listings added by admin</button>
         </div>
       </section>
@@ -139,6 +140,32 @@
         </div>
       </section>
 
+      <section id="admin-pilots-section" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Admin</p>
+          <h1 class="page-title">All pilots</h1>
+          <p class="page-subtitle">See who signed up, whether they finished a listing, and help them get back in. Passwords can’t be viewed — only reset.</p>
+        </div>
+
+        <div class="admin-pilots-toolbar">
+          <label class="admin-filter-toggle">
+            <input type="checkbox" id="admin-pilots-incomplete-only">
+            Incomplete only (no listing yet)
+          </label>
+          <input type="search" id="admin-pilots-search" class="admin-pilots-search" placeholder="Search name or email…" autocomplete="off">
+        </div>
+
+        <div class="admin-pilots-wrap">
+          <p class="admin-listings-status" id="admin-pilots-loading">Loading…</p>
+          <p class="admin-listings-status" id="admin-pilots-empty" hidden>No pilots match.</p>
+          <p class="form-message is-error" id="admin-pilots-error" hidden></p>
+          <p class="form-message is-success" id="admin-pilots-message" hidden></p>
+          <div class="admin-pilots-list" id="admin-pilots-list" hidden></div>
+        </div>
+
+        <button type="button" class="btn-secondary admin-listings-back" id="admin-pilots-back-btn">Back</button>
+      </section>
+
       <section id="admin-listings-section" hidden>
         <div class="page-head">
           <p class="eyebrow">Admin</p>
@@ -165,14 +192,14 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=61"></script>
-  <script src="js/sw-register.js?v=61"></script>
+  <script src="js/config.js?v=62"></script>
+  <script src="js/sw-register.js?v=62"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=61"></script>
-  <script src="js/states.js?v=61"></script>
-  <script src="js/services.js?v=61"></script>
-  <script src="js/storage.js?v=61"></script>
-  <script src="js/auth.js?v=61"></script>
-  <script src="js/admin-dashboard.js?v=61"></script>
+  <script src="js/supabase-client.js?v=62"></script>
+  <script src="js/states.js?v=62"></script>
+  <script src="js/services.js?v=62"></script>
+  <script src="js/storage.js?v=62"></script>
+  <script src="js/auth.js?v=62"></script>
+  <script src="js/admin-dashboard.js?v=62"></script>
 </body>
 </html>

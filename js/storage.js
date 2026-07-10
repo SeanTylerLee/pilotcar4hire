@@ -144,6 +144,45 @@ async function getAllListingsWithUsers() {
   return (data || []).map(mapListingRow);
 }
 
+async function getAllPilotsWithListings() {
+  if (useLocalDev()) {
+    const listings = getLocalListings().map(withDevUser);
+    const byUser = new Map(listings.map((listing) => [listing.userId, listing]));
+    return [{
+      id: DEV_PILOT_USER.id,
+      name: DEV_PILOT_USER.name,
+      email: DEV_PILOT_USER.email,
+      createdAt: Date.now(),
+      listing: byUser.get(DEV_PILOT_USER.id) || null,
+    }];
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, name, email, created_at, listings(*)')
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return (data || []).map((row) => {
+    const listingRows = Array.isArray(row.listings)
+      ? row.listings
+      : (row.listings ? [row.listings] : []);
+    const listing = listingRows[0] ? mapListingRow({
+      ...listingRows[0],
+      profiles: { name: row.name, email: row.email },
+    }) : null;
+
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      createdAt: row.created_at ? new Date(row.created_at).getTime() : null,
+      listing,
+    };
+  });
+}
+
 async function getAdminPilotHandoffs() {
   if (useLocalDev()) {
     return getLocalAdminHandoffs()

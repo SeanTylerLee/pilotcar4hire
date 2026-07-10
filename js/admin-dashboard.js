@@ -17,13 +17,23 @@
   const formSection = document.getElementById('admin-form-section');
   const successSection = document.getElementById('admin-success-section');
   const listingsSection = document.getElementById('admin-listings-section');
+  const pilotsSection = document.getElementById('admin-pilots-section');
   const startBtn = document.getElementById('admin-start-btn');
   const listingsBtn = document.getElementById('admin-listings-btn');
+  const pilotsBtn = document.getElementById('admin-pilots-btn');
   const listingsBackBtn = document.getElementById('admin-listings-back-btn');
+  const pilotsBackBtn = document.getElementById('admin-pilots-back-btn');
   const listingsLoading = document.getElementById('admin-listings-loading');
   const listingsEmpty = document.getElementById('admin-listings-empty');
   const listingsError = document.getElementById('admin-listings-error');
   const handoffsList = document.getElementById('admin-handoffs-list');
+  const pilotsLoading = document.getElementById('admin-pilots-loading');
+  const pilotsEmpty = document.getElementById('admin-pilots-empty');
+  const pilotsError = document.getElementById('admin-pilots-error');
+  const pilotsMessage = document.getElementById('admin-pilots-message');
+  const pilotsList = document.getElementById('admin-pilots-list');
+  const pilotsIncompleteOnly = document.getElementById('admin-pilots-incomplete-only');
+  const pilotsSearch = document.getElementById('admin-pilots-search');
   const cancelBtn = document.getElementById('admin-cancel-btn');
   const formBackBtn = document.getElementById('admin-form-back-btn');
   const form = document.getElementById('admin-listing-form');
@@ -38,6 +48,9 @@
   const homeStateSelect = document.getElementById('admin-home-state');
   const successWarning = document.getElementById('success-warning');
   const successBackBtn = document.getElementById('admin-success-back-btn');
+
+  let allPilots = [];
+  let handoffByUserId = new Map();
 
   LISTING_SERVICES.forEach((service) => {
     const label = document.createElement('label');
@@ -90,6 +103,7 @@
     formSection.hidden = view !== 'form';
     successSection.hidden = view !== 'success';
     listingsSection.hidden = view !== 'listings';
+    pilotsSection.hidden = view !== 'pilots';
     if (view === 'success') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -101,6 +115,122 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+
+  function formatSignedUp(timestamp) {
+    if (!timestamp) return '—';
+    try {
+      return new Date(timestamp).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return '—';
+    }
+  }
+
+  function showPilotsBanner(text, isError) {
+    pilotsMessage.textContent = text;
+    pilotsMessage.hidden = false;
+    pilotsMessage.classList.toggle('is-error', isError);
+    pilotsMessage.classList.toggle('is-success', !isError);
+  }
+
+  function getFilteredPilots() {
+    const incompleteOnly = pilotsIncompleteOnly?.checked;
+    const query = (pilotsSearch?.value || '').trim().toLowerCase();
+
+    return allPilots.filter((pilot) => {
+      if (incompleteOnly && pilot.listing) return false;
+      if (!query) return true;
+      const haystack = `${pilot.name || ''} ${pilot.email || ''} ${pilot.listing?.businessName || ''}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }
+
+  function renderPilotCard(pilot) {
+    const listing = pilot.listing;
+    const handoff = handoffByUserId.get(pilot.id);
+    const statusClass = listing ? 'is-complete' : 'is-incomplete';
+    const statusLabel = listing ? 'Listing live' : 'No listing yet';
+    const listingHtml = listing
+      ? `
+        <dl class="admin-pilot-listing">
+          <div><dt>Business</dt><dd>${escapeHtml(listing.businessName || '—')}</dd></div>
+          <div><dt>Phone</dt><dd>${escapeHtml(listing.phone || '—')}</dd></div>
+          <div><dt>Public email</dt><dd>${escapeHtml(listing.email || '—')}</dd></div>
+          <div><dt>Based in</dt><dd>${escapeHtml(formatHomeLocation(listing.homeCity, listing.homeState) || '—')}</dd></div>
+        </dl>
+      `
+      : '<p class="admin-pilot-missing">Signed up but never finished a listing. Call or email them and walk them through it, or add the listing yourself from intake.</p>';
+
+    const passwordHtml = handoff?.tempPassword
+      ? `<p class="admin-pilot-password"><strong>Temp password on file:</strong> ${escapeHtml(handoff.tempPassword)} <span class="admin-pilot-password-note">(from when you added them)</span></p>`
+      : '<p class="admin-pilot-password-note">Password can’t be viewed. Use Send reset email if they forgot it.</p>';
+
+    return `
+      <article class="admin-pilot-card panel" data-pilot-id="${escapeHtml(pilot.id)}">
+        <div class="admin-pilot-card-head">
+          <div>
+            <h2 class="admin-pilot-name">${escapeHtml(pilot.name || '—')}</h2>
+            <p class="admin-pilot-email">${escapeHtml(pilot.email || '—')}</p>
+            <p class="admin-pilot-meta">Signed up ${escapeHtml(formatSignedUp(pilot.createdAt))}</p>
+          </div>
+          <span class="admin-pilot-status ${statusClass}">${statusLabel}</span>
+        </div>
+        ${listingHtml}
+        ${passwordHtml}
+        <div class="admin-pilot-actions">
+          <button type="button" class="btn-secondary btn-small" data-copy-pilot-email="${escapeHtml(pilot.email || '')}">Copy email</button>
+          <button type="button" class="btn-secondary btn-small" data-reset-pilot="${escapeHtml(pilot.email || '')}">Send reset email</button>
+          ${handoff?.tempPassword ? `<button type="button" class="btn-secondary btn-small" data-copy-pilot-password="${escapeHtml(handoff.tempPassword)}">Copy temp password</button>` : ''}
+        </div>
+      </article>
+    `;
+  }
+
+  function renderPilotsList() {
+    const filtered = getFilteredPilots();
+    pilotsLoading.hidden = true;
+    pilotsError.hidden = true;
+
+    if (filtered.length === 0) {
+      pilotsList.hidden = true;
+      pilotsEmpty.hidden = false;
+      return;
+    }
+
+    pilotsEmpty.hidden = true;
+    pilotsList.innerHTML = filtered.map(renderPilotCard).join('');
+    pilotsList.hidden = false;
+  }
+
+  async function loadAllPilots() {
+    pilotsLoading.hidden = false;
+    pilotsEmpty.hidden = true;
+    pilotsError.hidden = true;
+    pilotsMessage.hidden = true;
+    pilotsList.hidden = true;
+    pilotsList.innerHTML = '';
+
+    try {
+      const [pilots, handoffs] = await Promise.all([
+        getAllPilotsWithListings(),
+        getAdminPilotHandoffs().catch(() => []),
+      ]);
+      allPilots = pilots;
+      handoffByUserId = new Map(
+        handoffs
+          .filter((row) => row.userId)
+          .map((row) => [row.userId, row]),
+      );
+      renderPilotsList();
+    } catch (err) {
+      pilotsLoading.hidden = true;
+      pilotsError.textContent = err.message;
+      pilotsError.hidden = false;
+    }
   }
 
   function formatHandoffMessage(handoff) {
@@ -236,9 +366,25 @@
     loadAdminHandoffs();
   });
 
+  pilotsBtn.addEventListener('click', () => {
+    showView('pilots');
+    loadAllPilots();
+  });
+
   listingsBackBtn.addEventListener('click', () => {
     showView('home');
   });
+
+  pilotsBackBtn.addEventListener('click', () => {
+    showView('home');
+  });
+
+  if (pilotsIncompleteOnly) {
+    pilotsIncompleteOnly.addEventListener('change', renderPilotsList);
+  }
+  if (pilotsSearch) {
+    pilotsSearch.addEventListener('input', renderPilotsList);
+  }
 
   cancelBtn.addEventListener('click', () => {
     showView('home');
@@ -367,6 +513,45 @@
       listingsError.textContent = err.message;
       listingsError.hidden = false;
       removeBtn.disabled = false;
+    }
+  });
+
+  pilotsList.addEventListener('click', async (event) => {
+    const copyEmailBtn = event.target.closest('[data-copy-pilot-email]');
+    if (copyEmailBtn) {
+      const email = copyEmailBtn.dataset.copyPilotEmail;
+      if (email) {
+        await copyText(email, copyEmailBtn);
+        showPilotsBanner(`Copied ${email}`, false);
+      }
+      return;
+    }
+
+    const copyPasswordBtn = event.target.closest('[data-copy-pilot-password]');
+    if (copyPasswordBtn) {
+      const password = copyPasswordBtn.dataset.copyPilotPassword;
+      if (password) {
+        await copyText(password, copyPasswordBtn);
+        showPilotsBanner('Copied temp password.', false);
+      }
+      return;
+    }
+
+    const resetBtn = event.target.closest('[data-reset-pilot]');
+    if (!resetBtn) return;
+
+    const email = resetBtn.dataset.resetPilot;
+    if (!email) return;
+    if (!window.confirm(`Send a password reset email to ${email}?`)) return;
+
+    resetBtn.disabled = true;
+    try {
+      await sendPasswordReset(email);
+      showPilotsBanner(`Reset email sent to ${email}.`, false);
+    } catch (err) {
+      showPilotsBanner(err.message, true);
+    } finally {
+      resetBtn.disabled = false;
     }
   });
 })();
