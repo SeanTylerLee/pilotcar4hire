@@ -4,7 +4,24 @@ const MAP_PROJECTION = {
   HI: { minLon: -161, maxLon: -154, minLat: 18, maxLat: 23, width: 200, height: 130, tx: 280, ty: 500, scale: 0.9 },
 };
 
-const GEOCODE_CACHE_KEY = 'pc4h_geocode_v1';
+const GEOCODE_CACHE_KEY = 'pc4h_geocode_v2';
+const CITY_ALIASES = {
+  okc: 'oklahoma city',
+  'okc ok': 'oklahoma city',
+  nyc: 'new york',
+  'new york city': 'new york',
+  la: 'los angeles',
+  'l a': 'los angeles',
+  sf: 'san francisco',
+  philly: 'philadelphia',
+  'ft worth': 'fort worth',
+  'ftworth': 'fort worth',
+  'st louis': 'saint louis',
+  'st louis mo': 'saint louis',
+  dc: 'washington',
+  'washington dc': 'washington',
+  'washington d c': 'washington',
+};
 const PIN_FILL = '#0d7a4e';
 const PIN_FILL_APPROX = '#3d9e6a';
 const CLUSTER_MIN_TOTAL = 12;
@@ -65,6 +82,54 @@ function waitForMapLayout() {
   });
 }
 
+function normalizeCityKey(city) {
+  return String(city || '')
+    .toLowerCase()
+    .replace(/[.’']/g, '')
+    .replace(/\./g, '')
+    .replace(/,/g, ' ')
+    .replace(/\bhgts\b/g, 'heights')
+    .replace(/\bhts\b/g, 'heights')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function lookupCityCoords(city, stateCode) {
+  const state = String(stateCode || '').toLowerCase();
+  const cities = window.US_CITY_COORDS?.[state];
+  if (!cities) return null;
+
+  const raw = normalizeCityKey(city);
+  if (!raw) return null;
+  const key = CITY_ALIASES[raw] || raw;
+  const candidates = [key];
+  if (key.endsWith(' city')) candidates.push(key.slice(0, -5).trim());
+  else candidates.push(`${key} city`);
+  if (key.startsWith('st ')) candidates.push(`saint ${key.slice(3)}`);
+  if (key.startsWith('saint ')) candidates.push(`st ${key.slice(6)}`);
+  if (key.startsWith('ft ')) candidates.push(`fort ${key.slice(3)}`);
+  if (key.startsWith('fort ')) candidates.push(`ft ${key.slice(5)}`);
+
+  for (const candidate of candidates) {
+    const hit = cities[candidate];
+    if (hit) return { lon: hit[0], lat: hit[1] };
+  }
+
+  const matches = Object.keys(cities).filter((name) => (
+    name === key
+    || name.startsWith(`${key} `)
+    || key.startsWith(`${name} `)
+    || name.includes(key)
+    || key.includes(name)
+  ));
+  if (matches.length === 1) {
+    const hit = cities[matches[0]];
+    return { lon: hit[0], lat: hit[1] };
+  }
+
+  return null;
+}
+
 function projectLonLat(lon, lat, stateCode) {
   const code = stateCode?.toUpperCase();
   let cfg = MAP_PROJECTION.continental;
@@ -105,6 +170,14 @@ function stateCenterCoords(svg, stateCode) {
     y: bbox.y + bbox.height / 2,
     approximate: true,
   };
+}
+
+function cityCoords(listing) {
+  const data = normalizeListing(listing);
+  const found = lookupCityCoords(data.homeCity, data.homeState);
+  if (!found) return null;
+  const projected = projectLonLat(found.lon, found.lat, data.homeState);
+  return isValidCoord(projected) ? { ...projected, approximate: false } : null;
 }
 
 function fallbackCoords(svg, listing, index) {
@@ -362,6 +435,18 @@ function createClusterPin(entries, handlers = {}) {
 
 async function refinePinCoords(svg, entry) {
   const data = normalizeListing(entry.listing);
+  if (entry.coords && entry.coords.approximate === false) return;
+
+  const local = lookupCityCoords(data.homeCity, data.homeState);
+  if (local) {
+    const projected = projectLonLat(local.lon, local.lat, data.homeState);
+    if (isValidCoord(projected)) {
+      entry.coords = { ...projected, approximate: false };
+      if (entry.pinEl) setPinCoords(entry.pinEl, entry.coords);
+      return;
+    }
+  }
+
   const geocoded = await geocodeHomeCity(data.homeCity, data.homeState);
 
   if (geocoded) {
@@ -469,7 +554,7 @@ async function renderMapPins(svg, listings, handlers = {}, options = {}) {
     return {
       listing,
       index,
-      coords: fallbackCoords(svg, listing, index),
+      coords: cityCoords(listing) || fallbackCoords(svg, listing, index),
       pinEl: null,
     };
   }).filter((entry) => isValidCoord(entry.coords));
