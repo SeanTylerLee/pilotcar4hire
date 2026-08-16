@@ -11,6 +11,7 @@ Then also run (in order) if you use admin tools:
 - `002_admin_added_listings.sql`
 - `003_admin_pilot_handoffs.sql`
 - `004_admin_edit_listings.sql` — lets admins edit/complete any pilot’s listing
+- `005_delete_own_account.sql` — required for App Store account deletion in the iOS app
 
 This creates `profiles` and `listings` tables, RLS policies, and a signup trigger.
 
