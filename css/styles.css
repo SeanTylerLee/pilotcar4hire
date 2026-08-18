@@ -2452,6 +2452,10 @@ button { font-family: inherit; }
   color: rgba(255, 255, 255, 0.4);
 }
 
+.footer-bottom p {
+  margin: 0.35rem 0 0;
+}
+
 .built-by {
   display: inline-flex;
   flex-direction: column;
