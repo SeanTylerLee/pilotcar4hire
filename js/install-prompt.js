@@ -7,7 +7,9 @@ function isAppInstalled() {
 
 function isIosSafari() {
   const ua = window.navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isIOS = typeof isIosDevice === 'function'
+    ? isIosDevice()
+    : /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
   return isIOS && isSafari;
 }
@@ -98,6 +100,8 @@ function showInstallUi() {
 }
 
 function initInstallPrompt() {
+  // iOS users get the App Store button instead of Add to Home Screen.
+  if (typeof isIosDevice === 'function' ? isIosDevice() : isIosSafari()) return;
   if (isAppInstalled() || isInstallDismissed() || !isMobileDevice()) return;
 
   const wrap = ensureInstallUi();

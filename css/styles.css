@@ -284,6 +284,41 @@ button { font-family: inherit; }
   color: var(--slate);
 }
 
+.app-store-badge {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.app-store-badge:hover,
+.app-store-badge:focus-visible {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.app-store-badge img {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+.app-store-badge--hero {
+  margin: 0.25rem auto 0;
+}
+
+.app-store-badge--footer {
+  margin-top: 0.75rem;
+  padding: 0.25rem;
+  background: var(--white);
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.app-store-badge--footer img {
+  height: 36px;
+}
+
 .install-app {
   display: flex;
   flex-wrap: wrap;
