@@ -284,7 +284,25 @@ button { font-family: inherit; }
   color: var(--slate);
 }
 
-.app-store-badge {
+.store-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem 0.75rem;
+}
+
+.store-badges--hero {
+  margin: 0.25rem auto 0;
+}
+
+.store-badges--footer {
+  margin-top: 0.75rem;
+  justify-content: flex-start;
+}
+
+.app-store-badge,
+.google-play-badge {
   display: inline-flex;
   align-items: center;
   line-height: 0;
@@ -292,12 +310,15 @@ button { font-family: inherit; }
 }
 
 .app-store-badge:hover,
-.app-store-badge:focus-visible {
+.app-store-badge:focus-visible,
+.google-play-badge:hover,
+.google-play-badge:focus-visible {
   opacity: 0.88;
   transform: translateY(-1px);
 }
 
-.app-store-badge img {
+.app-store-badge img,
+.google-play-badge img {
   height: 40px;
   width: auto;
   display: block;
@@ -307,15 +328,21 @@ button { font-family: inherit; }
   margin: 0.25rem auto 0;
 }
 
-.app-store-badge--footer {
-  margin-top: 0.75rem;
+.app-store-badge--footer,
+.store-badges--footer .app-store-badge,
+.store-badges--footer .google-play-badge {
   padding: 0.25rem;
   background: var(--white);
   border-radius: 8px;
   width: fit-content;
 }
 
-.app-store-badge--footer img {
+.app-store-badge--footer {
+  margin-top: 0.75rem;
+}
+
+.app-store-badge--footer img,
+.store-badges--footer img {
   height: 36px;
 }
 
@@ -3055,6 +3082,15 @@ button { font-family: inherit; }
   .map-zoom-controls {
     top: 0.5rem;
     right: 0.5rem;
+  }
+
+  .store-badges--hero {
+    gap: 0.5rem;
+  }
+
+  .app-store-badge img,
+  .google-play-badge img {
+    height: 36px;
   }
 
 }
