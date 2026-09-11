@@ -22,7 +22,7 @@
   <meta name="twitter:title" content="US Pilot Car Directory | Find Pilot Cars Nationwide">
   <meta name="twitter:description" content="The free US pilot car directory. Find certified pilot cars and escorts for oversize loads in every state.">
   <meta name="twitter:image" content="https://www.pilotcar4hire.com/images/icon-512.png">
-  <link rel="stylesheet" href="css/styles.css?v=69">
+  <link rel="stylesheet" href="css/styles.css?v=70">
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="images/favicon-16.png" type="image/png" sizes="16x16">
@@ -244,56 +244,34 @@
       </div>
     </section>
 
-    <section class="seo-content panel" aria-labelledby="seo-about-heading">
-      <h2 id="seo-about-heading" class="seo-content-title">The US pilot car directory carriers trust</h2>
-      <p>Pilot Car 4 Hire is a free, nationwide <strong>pilot car directory</strong> built for oversize and heavy haul freight. Whether you search for <strong>pilot cars</strong>, a <strong>US pilot cars</strong> listing service, or <strong>uspilotcars</strong> by state, you can find certified escorts here — lead, chase, hi-pole, route survey, steereman, and flagger services.</p>
-      <p>Carriers browse by state on the interactive map or use our <a href="pilot-cars.html">pilot car directory by state</a>. Drivers list for free and appear on the map where carriers are already looking. No fees, no middleman — contact pilot car operators directly.</p>
-      <nav class="seo-state-links" aria-label="Popular pilot car states">
-        <a href="state.html?state=TX">Texas pilot cars</a>
-        <a href="state.html?state=NM">New Mexico pilot cars</a>
-        <a href="state.html?state=OK">Oklahoma pilot cars</a>
-        <a href="state.html?state=LA">Louisiana pilot cars</a>
-        <a href="state.html?state=AR">Arkansas pilot cars</a>
-        <a href="pilot-cars.html">All 50 states →</a>
-      </nav>
-    </section>
   </main>
 
   <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <img src="images/logo.svg" alt="" class="footer-logo" width="160" height="36">
-        <p class="footer-tagline">Escorts · Leads · Oversize Loads</p>
+    <div class="footer-bar">
+      <p class="footer-copy">&copy; 2026 STL Apps LLC</p>
+      <button type="button" class="footer-menu-toggle" id="footer-menu-toggle" aria-expanded="false" aria-controls="site-menu">
+        <span class="footer-hamburger" aria-hidden="true"><span></span></span>
+        Menu
+      </button>
+    </div>
+    <div class="site-menu" id="site-menu" hidden>
+      <button type="button" class="site-menu-backdrop" tabindex="-1" data-close-menu aria-label="Close menu"></button>
+      <div class="site-menu-sheet" role="dialog" aria-modal="true" aria-labelledby="site-menu-title" tabindex="-1">
+        <p class="site-menu-title" id="site-menu-title">Menu</p>
+        <nav class="site-menu-nav">
+          <a href="index.html#map">Find pilot cars</a>
+          <a href="pilot-cars.html">Pilot car directory</a>
+          <a href="signup.html">List your service</a>
+          <a href="account.html">Account</a>
+          <a href="about.html">About</a>
+          <a href="mailto:team@pilotcar4hire.com">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+        <button type="button" class="site-menu-close" data-close-menu>Close</button>
       </div>
-      <nav class="footer-nav">
-        <a href="index.html#map">Find pilot cars</a>
-        <a href="pilot-cars.html">Pilot car directory</a>
-        <a href="about.html">About</a>
-        <a href="mailto:team@pilotcar4hire.com">Contact</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="terms.html">Terms</a>
-        <a href="signup.html">List your service</a>
-        <a href="account.html">Account</a>
-      </nav>
-      <nav class="footer-seo" aria-label="US pilot cars by state">
-        <a href="state.html?state=TX">TX</a>
-        <a href="state.html?state=NM">NM</a>
-        <a href="state.html?state=OK">OK</a>
-        <a href="state.html?state=LA">LA</a>
-        <a href="state.html?state=AR">AR</a>
-        <a href="state.html?state=CA">CA</a>
-        <a href="state.html?state=FL">FL</a>
-        <a href="pilot-cars.html">All states</a>
-      </nav>
     </div>
-    <div class="footer-bottom">
-      <a class="built-by" href="https://seantylerlee.com" target="_blank" rel="noopener noreferrer">
-        <span>Built by</span>
-        <img src="images/stlapps-logo.jpg" alt="STL Apps LLC" width="160" height="36" />
-      </a>
-      <p>&copy; 2026 STL Apps LLC. All rights reserved. <a href="admin.html" class="footer-admin-link">Admin</a><span class="version-badge" id="site-version" hidden></span></p>
-      <p>Pilot Car 4 Hire is owned solely by STL Apps LLC.</p>
-    </div>
+    <span class="version-badge" id="site-version" hidden></span>
   </footer>
 
   <script src="js/config.js?v=67"></script>
@@ -309,7 +287,7 @@
   <script src="js/us-cities.js?v=64"></script>
   <script src="js/map-pins.js?v=64"></script>
   <script src="js/map-zoom.js?v=63"></script>
-  <script src="js/menu.js?v=63"></script>
+  <script src="js/menu.js?v=70"></script>
   <script src="js/browse.js?v=63"></script>
   <script src="js/main.js?v=63"></script>
 </body>
