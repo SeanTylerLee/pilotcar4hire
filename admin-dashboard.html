@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#152238">
   <meta name="robots" content="noindex, nofollow">
   <title>Admin | Pilot Car 4 Hire</title>
-  <link rel="stylesheet" href="css/styles.css?v=65">
+  <link rel="stylesheet" href="css/styles.css?v=66">
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="icon" href="images/favicon-16.png" type="image/png" sizes="16x16">
@@ -28,6 +28,7 @@
           <button type="button" class="btn-submit admin-start-btn" id="admin-start-btn">Add a pilot car listing</button>
           <button type="button" class="btn-secondary admin-start-btn" id="admin-pilots-btn">All pilots &amp; help incomplete</button>
           <button type="button" class="btn-secondary admin-start-btn" id="admin-listings-btn">Listings added by admin</button>
+          <button type="button" class="btn-secondary admin-start-btn" id="admin-emails-btn">Registered emails</button>
         </div>
       </section>
 
@@ -184,6 +185,30 @@
 
         <button type="button" class="btn-secondary admin-listings-back" id="admin-listings-back-btn">Back</button>
       </section>
+
+      <section id="admin-emails-section" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Admin</p>
+          <h1 class="page-title">Registered emails</h1>
+          <p class="page-subtitle">Every account email on file. Copy one, or copy them all at once for paste into email or a spreadsheet.</p>
+        </div>
+
+        <div class="admin-emails-toolbar">
+          <p class="admin-emails-count" id="admin-emails-count" hidden></p>
+          <button type="button" class="btn-submit btn-small" id="admin-emails-copy-all" hidden>Copy all emails</button>
+        </div>
+
+        <div class="admin-emails-wrap">
+          <p class="admin-listings-status" id="admin-emails-loading">Loading…</p>
+          <p class="admin-listings-status" id="admin-emails-empty" hidden>No registered accounts yet.</p>
+          <p class="form-message is-error" id="admin-emails-error" hidden></p>
+          <p class="form-message is-success" id="admin-emails-message" hidden></p>
+          <textarea class="admin-emails-bulk" id="admin-emails-bulk" readonly hidden rows="8" aria-label="All registered emails"></textarea>
+          <ul class="admin-emails-list" id="admin-emails-list" hidden></ul>
+        </div>
+
+        <button type="button" class="btn-secondary admin-listings-back" id="admin-emails-back-btn">Back</button>
+      </section>
     </div>
   </main>
 
@@ -194,14 +219,14 @@
     </div>
   </footer>
 
-  <script src="js/config.js?v=63"></script>
-  <script src="js/sw-register.js?v=63"></script>
+  <script src="js/config.js?v=64"></script>
+  <script src="js/sw-register.js?v=64"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=63"></script>
-  <script src="js/states.js?v=63"></script>
-  <script src="js/services.js?v=63"></script>
-  <script src="js/storage.js?v=63"></script>
-  <script src="js/auth.js?v=63"></script>
-  <script src="js/admin-dashboard.js?v=63"></script>
+  <script src="js/supabase-client.js?v=64"></script>
+  <script src="js/states.js?v=64"></script>
+  <script src="js/services.js?v=64"></script>
+  <script src="js/storage.js?v=64"></script>
+  <script src="js/auth.js?v=64"></script>
+  <script src="js/admin-dashboard.js?v=64"></script>
 </body>
 </html>

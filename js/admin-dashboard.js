@@ -18,11 +18,14 @@
   const successSection = document.getElementById('admin-success-section');
   const listingsSection = document.getElementById('admin-listings-section');
   const pilotsSection = document.getElementById('admin-pilots-section');
+  const emailsSection = document.getElementById('admin-emails-section');
   const startBtn = document.getElementById('admin-start-btn');
   const listingsBtn = document.getElementById('admin-listings-btn');
   const pilotsBtn = document.getElementById('admin-pilots-btn');
+  const emailsBtn = document.getElementById('admin-emails-btn');
   const listingsBackBtn = document.getElementById('admin-listings-back-btn');
   const pilotsBackBtn = document.getElementById('admin-pilots-back-btn');
+  const emailsBackBtn = document.getElementById('admin-emails-back-btn');
   const listingsLoading = document.getElementById('admin-listings-loading');
   const listingsEmpty = document.getElementById('admin-listings-empty');
   const listingsError = document.getElementById('admin-listings-error');
@@ -34,6 +37,14 @@
   const pilotsList = document.getElementById('admin-pilots-list');
   const pilotsIncompleteOnly = document.getElementById('admin-pilots-incomplete-only');
   const pilotsSearch = document.getElementById('admin-pilots-search');
+  const emailsLoading = document.getElementById('admin-emails-loading');
+  const emailsEmpty = document.getElementById('admin-emails-empty');
+  const emailsError = document.getElementById('admin-emails-error');
+  const emailsMessage = document.getElementById('admin-emails-message');
+  const emailsList = document.getElementById('admin-emails-list');
+  const emailsBulk = document.getElementById('admin-emails-bulk');
+  const emailsCount = document.getElementById('admin-emails-count');
+  const emailsCopyAllBtn = document.getElementById('admin-emails-copy-all');
   const cancelBtn = document.getElementById('admin-cancel-btn');
   const formBackBtn = document.getElementById('admin-form-back-btn');
   const form = document.getElementById('admin-listing-form');
@@ -55,6 +66,7 @@
   const formSubmitBtn = document.getElementById('admin-form-submit');
 
   let allPilots = [];
+  let registeredEmails = [];
   let handoffByUserId = new Map();
   let formMode = 'create';
   let editingPilot = null;
@@ -111,6 +123,7 @@
     successSection.hidden = view !== 'success';
     listingsSection.hidden = view !== 'listings';
     pilotsSection.hidden = view !== 'pilots';
+    if (emailsSection) emailsSection.hidden = view !== 'emails';
     if (view === 'success') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -240,6 +253,86 @@
       pilotsLoading.hidden = true;
       pilotsError.textContent = err.message;
       pilotsError.hidden = false;
+    }
+  }
+
+  function showEmailsBanner(text, isError) {
+    if (!emailsMessage) return;
+    emailsMessage.textContent = text;
+    emailsMessage.hidden = false;
+    emailsMessage.classList.toggle('is-error', isError);
+    emailsMessage.classList.toggle('is-success', !isError);
+  }
+
+  function renderRegisteredEmails() {
+    if (!emailsList) return;
+
+    emailsLoading.hidden = true;
+    emailsError.hidden = true;
+
+    if (registeredEmails.length === 0) {
+      emailsList.hidden = true;
+      emailsList.innerHTML = '';
+      if (emailsBulk) {
+        emailsBulk.hidden = true;
+        emailsBulk.value = '';
+      }
+      if (emailsCount) emailsCount.hidden = true;
+      if (emailsCopyAllBtn) emailsCopyAllBtn.hidden = true;
+      emailsEmpty.hidden = false;
+      return;
+    }
+
+    emailsEmpty.hidden = true;
+    const bulkText = registeredEmails.join('\n');
+    if (emailsBulk) {
+      emailsBulk.value = bulkText;
+      emailsBulk.hidden = false;
+    }
+    if (emailsCount) {
+      emailsCount.textContent = `${registeredEmails.length} registered email${registeredEmails.length === 1 ? '' : 's'}`;
+      emailsCount.hidden = false;
+    }
+    if (emailsCopyAllBtn) emailsCopyAllBtn.hidden = false;
+
+    emailsList.innerHTML = registeredEmails.map((email) => `
+      <li class="admin-email-row panel">
+        <span class="admin-email-address">${escapeHtml(email)}</span>
+        <button type="button" class="btn-secondary btn-small" data-copy-registered-email="${escapeHtml(email)}">Copy</button>
+      </li>
+    `).join('');
+    emailsList.hidden = false;
+  }
+
+  async function loadRegisteredEmails() {
+    if (!emailsLoading) return;
+
+    emailsLoading.hidden = false;
+    emailsEmpty.hidden = true;
+    emailsError.hidden = true;
+    if (emailsMessage) emailsMessage.hidden = true;
+    if (emailsList) {
+      emailsList.hidden = true;
+      emailsList.innerHTML = '';
+    }
+    if (emailsBulk) {
+      emailsBulk.hidden = true;
+      emailsBulk.value = '';
+    }
+    if (emailsCount) emailsCount.hidden = true;
+    if (emailsCopyAllBtn) emailsCopyAllBtn.hidden = true;
+
+    try {
+      const pilots = await getAllPilotsWithListings();
+      registeredEmails = pilots
+        .map((pilot) => (pilot.email || '').trim())
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+      renderRegisteredEmails();
+    } catch (err) {
+      emailsLoading.hidden = true;
+      emailsError.textContent = err.message;
+      emailsError.hidden = false;
     }
   }
 
@@ -463,6 +556,13 @@
     loadAllPilots();
   });
 
+  if (emailsBtn) {
+    emailsBtn.addEventListener('click', () => {
+      showView('emails');
+      loadRegisteredEmails();
+    });
+  }
+
   listingsBackBtn.addEventListener('click', () => {
     showView('home');
   });
@@ -470,6 +570,37 @@
   pilotsBackBtn.addEventListener('click', () => {
     showView('home');
   });
+
+  if (emailsBackBtn) {
+    emailsBackBtn.addEventListener('click', () => {
+      showView('home');
+    });
+  }
+
+  if (emailsCopyAllBtn) {
+    emailsCopyAllBtn.addEventListener('click', async () => {
+      const text = registeredEmails.join('\n');
+      if (!text) return;
+      await copyText(text, emailsCopyAllBtn);
+      showEmailsBanner(`Copied ${registeredEmails.length} email${registeredEmails.length === 1 ? '' : 's'}.`, false);
+    });
+  }
+
+  if (emailsList) {
+    emailsList.addEventListener('click', async (event) => {
+      const copyBtn = event.target.closest('[data-copy-registered-email]');
+      if (!copyBtn) return;
+      const email = copyBtn.dataset.copyRegisteredEmail || '';
+      if (!email) return;
+      await copyText(email, copyBtn);
+    });
+  }
+
+  if (emailsBulk) {
+    emailsBulk.addEventListener('focus', () => {
+      emailsBulk.select();
+    });
+  }
 
   if (pilotsIncompleteOnly) {
     pilotsIncompleteOnly.addEventListener('change', renderPilotsList);
