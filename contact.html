@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#152238">
   <meta name="apple-itunes-app" content="app-id=6802048795">
-  <meta name="description" content="Set a new password for your Pilot Car 4 Hire account.">
-  <title>Reset Password | Pilot Car 4 Hire</title>
+  <meta name="description" content="Contact the Pilot Car 4 Hire team. Send a message about the directory, listings, or the app.">
+  <title>Contact — Pilot Car 4 Hire</title>
+  <link rel="canonical" href="https://www.pilotcar4hire.com/contact.html">
   <link rel="stylesheet" href="css/styles.css?v=70">
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="icon" href="images/favicon-32.png" type="image/png" sizes="32x32">
-  <link rel="icon" href="images/favicon-16.png" sizes="16x16" type="image/png">
+  <link rel="icon" href="images/favicon-16.png" type="image/png" sizes="16x16">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
 </head>
@@ -25,23 +26,26 @@
   <main class="main page" id="main-content">
     <div class="page-inner">
       <div class="page-head">
-        <p class="eyebrow">Account recovery</p>
-        <h1 class="page-title">Set new password</h1>
-        <p class="page-subtitle">Choose a new password for your pilot car account.</p>
+        <p class="eyebrow">Contact</p>
+        <h1 class="page-title">Get in touch</h1>
+        <p class="page-subtitle">Questions about listings, the directory, or the app — send a message and we’ll get back to you.</p>
       </div>
 
-      <form class="auth-form panel" id="reset-form">
+      <form class="auth-form panel" id="contact-form" novalidate>
         <label class="field">
-          <span class="field-label">New password</span>
-          <input type="password" name="password" required autocomplete="new-password" minlength="6">
+          <span class="field-label">Name</span>
+          <input type="text" name="name" id="contact-name" required autocomplete="name" placeholder="Your name">
         </label>
         <label class="field">
-          <span class="field-label">Confirm password</span>
-          <input type="password" name="confirmPassword" required autocomplete="new-password" minlength="6">
+          <span class="field-label">Email</span>
+          <input type="email" name="email" id="contact-email" required autocomplete="email" placeholder="you@company.com">
         </label>
-        <p class="form-message" id="reset-message" hidden></p>
-        <button type="submit" class="btn-submit">Update password</button>
-        <a href="login.html" class="text-link">Back to log in</a>
+        <label class="field">
+          <span class="field-label">Message</span>
+          <textarea name="message" id="contact-message" rows="6" required placeholder="How can we help?"></textarea>
+        </label>
+        <p class="form-message" id="contact-message-status" hidden></p>
+        <button type="submit" class="btn-submit">Send message</button>
       </form>
     </div>
   </main>
@@ -75,11 +79,8 @@
   </footer>
 
   <script src="js/config.js?v=67"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
-  <script src="js/supabase-client.js?v=18"></script>
-  <script src="js/storage.js?v=18"></script>
-  <script src="js/auth.js?v=18"></script>
   <script src="js/menu.js?v=70"></script>
-  <script src="js/reset-password.js?v=18"></script>
+  <script src="js/studioInbox.js"></script>
+  <script src="js/contact.js"></script>
 </body>
 </html>
