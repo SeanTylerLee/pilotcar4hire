@@ -1,25 +1,4 @@
 const LISTINGS_KEY = 'pc4h_listings';
-const ADMIN_HANDOFFS_KEY = 'pc4h_admin_handoffs';
-
-function mapHandoffRow(row) {
-  return {
-    id: row.id,
-    userId: row.user_id || row.userId,
-    contactName: row.contact_name || row.contactName,
-    loginEmail: row.login_email || row.loginEmail,
-    tempPassword: row.temp_password || row.tempPassword,
-    phone: row.phone,
-    createdAt: row.created_at ? new Date(row.created_at).getTime() : row.createdAt,
-  };
-}
-
-function getLocalAdminHandoffs() {
-  return JSON.parse(localStorage.getItem(ADMIN_HANDOFFS_KEY) || '[]').map(mapHandoffRow);
-}
-
-function saveLocalAdminHandoffs(handoffs) {
-  localStorage.setItem(ADMIN_HANDOFFS_KEY, JSON.stringify(handoffs));
-}
 
 function generateId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -129,15 +108,6 @@ async function upsertListing(listing) {
   return mapListingRow(data);
 }
 
-async function adminUpsertListingForUser(userId, listing) {
-  if (!userId) throw new Error('Missing pilot account.');
-  return upsertListing({
-    ...listing,
-    userId,
-    addedByAdmin: listing.addedByAdmin ?? true,
-  });
-}
-
 async function getAllListingsWithUsers() {
   if (useLocalDev()) {
     return getLocalListings()
@@ -152,106 +122,6 @@ async function getAllListingsWithUsers() {
 
   if (error) throw new Error(error.message);
   return (data || []).map(mapListingRow);
-}
-
-async function getAllPilotsWithListings() {
-  if (useLocalDev()) {
-    const listings = getLocalListings().map(withDevUser);
-    const byUser = new Map(listings.map((listing) => [listing.userId, listing]));
-    return [{
-      id: DEV_PILOT_USER.id,
-      name: DEV_PILOT_USER.name,
-      email: DEV_PILOT_USER.email,
-      createdAt: Date.now(),
-      listing: byUser.get(DEV_PILOT_USER.id) || null,
-    }];
-  }
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, email, created_at, listings(*)')
-    .order('created_at', { ascending: false });
-
-  if (error) throw new Error(error.message);
-
-  return (data || []).map((row) => {
-    const listingRows = Array.isArray(row.listings)
-      ? row.listings
-      : (row.listings ? [row.listings] : []);
-    const listing = listingRows[0] ? mapListingRow({
-      ...listingRows[0],
-      profiles: { name: row.name, email: row.email },
-    }) : null;
-
-    return {
-      id: row.id,
-      name: row.name,
-      email: row.email,
-      createdAt: row.created_at ? new Date(row.created_at).getTime() : null,
-      listing,
-    };
-  });
-}
-
-async function getAdminPilotHandoffs() {
-  if (useLocalDev()) {
-    return getLocalAdminHandoffs()
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }
-
-  const { data, error } = await supabase
-    .from('admin_pilot_handoffs')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) throw new Error(error.message);
-  return (data || []).map(mapHandoffRow);
-}
-
-async function saveAdminPilotHandoff(handoff) {
-  const payload = {
-    user_id: handoff.userId,
-    contact_name: handoff.contactName,
-    login_email: handoff.loginEmail,
-    temp_password: handoff.tempPassword,
-    phone: handoff.phone,
-  };
-
-  if (useLocalDev()) {
-    const handoffs = getLocalAdminHandoffs();
-    const saved = {
-      ...mapHandoffRow(payload),
-      id: handoff.id || generateId(),
-      userId: handoff.userId,
-      createdAt: Date.now(),
-    };
-    handoffs.push(saved);
-    saveLocalAdminHandoffs(handoffs);
-    return saved;
-  }
-
-  const { data, error } = await supabase
-    .from('admin_pilot_handoffs')
-    .insert(payload)
-    .select('*')
-    .single();
-
-  if (error) throw new Error(error.message);
-  return mapHandoffRow(data);
-}
-
-async function removeAdminPilotHandoff(handoffId) {
-  if (useLocalDev()) {
-    saveLocalAdminHandoffs(getLocalAdminHandoffs().filter((row) => row.id !== handoffId));
-    return;
-  }
-
-  const { error } = await supabase
-    .from('admin_pilot_handoffs')
-    .delete()
-    .eq('id', handoffId);
-
-  if (error) throw new Error(error.message);
 }
 
 async function deleteListingByUserId(userId) {

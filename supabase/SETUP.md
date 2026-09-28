@@ -6,13 +6,15 @@ In [Supabase Dashboard](https://supabase.com/dashboard) → **PilotCar4Hire** �
 
 `supabase/migrations/001_initial_schema.sql`
 
-Then also run (in order) if you use admin tools:
+Then also run (in order) for Studio admin / app features:
 
 - `002_admin_added_listings.sql`
-- `003_admin_pilot_handoffs.sql`
-- `004_admin_edit_listings.sql` — lets admins edit/complete any pilot’s listing
+- `003_admin_pilot_handoffs.sql` — temp login handoffs used by STL Studio PC4H Admin
+- `004_admin_edit_listings.sql` — legacy website-admin policies (Studio uses service_role)
 - `005_delete_own_account.sql` — required for App Store account deletion in the iOS app
 - `006_app_announcements.sql` — in-app Studio messages (blocking gate on open until Clear)
+
+Pilot admin tools live in STL Studio (**PC4H Admin**), not on the public website.
 
 This creates `profiles` and `listings` tables, RLS policies, and a signup trigger.
 
