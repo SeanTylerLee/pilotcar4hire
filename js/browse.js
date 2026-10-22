@@ -366,6 +366,13 @@ runWhenReady(async () => {
       console.error(err);
       allListings = [];
     }
+    if (typeof loadPublishedReviews === 'function') {
+      try {
+        await loadPublishedReviews();
+      } catch (err) {
+        console.error(err);
+      }
+    }
     updateMapHighlights();
     updateMapLegend();
     await updateMapPins();

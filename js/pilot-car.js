@@ -101,6 +101,9 @@ runWhenReady(async () => {
 
   async function loadListing() {
     try {
+      if (typeof loadPublishedReviews === 'function') {
+        await loadPublishedReviews();
+      }
       const listing = await getListingByUserId(userId);
       fillForm(listing);
       renderLiveListing(listing);

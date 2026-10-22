@@ -13,6 +13,7 @@ Then also run (in order) for Studio admin / app features:
 - `004_admin_edit_listings.sql` — legacy website-admin policies (Studio uses service_role)
 - `005_delete_own_account.sql` — required for App Store account deletion in the iOS app
 - `006_app_announcements.sql` — in-app Studio messages (blocking gate on open until Clear)
+- `007_listing_reviews.sql` — public 1–5 star reviews stay pending until accepted in Studio PC4H Admin
 
 Pilot admin tools live in STL Studio (**PC4H Admin**), not on the public website.
 
@@ -53,5 +54,6 @@ window.SUPABASE_ANON_KEY = 'eyJ...';
 | `listings` | One listing per driver — visible to everyone on browse |
 | `app_announcements` | Studio in-app messages shown on open until the user taps Clear |
 | `app_announcement_reads` | Per-account Clear records for those messages |
+| `listing_reviews` | Carrier reviews of a listing. Public can insert only via `submit_listing_review` (always pending). Only `status = published` rows are readable. Studio PC4H Admin accepts or rejects. |
 
-Carriers do not have accounts; they browse listings anonymously.
+Carriers do not have accounts; they browse listings anonymously. Anyone can leave a 1–5 star review plus a short comment; it stays hidden until you accept it in Studio.
