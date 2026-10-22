@@ -466,26 +466,36 @@ runWhenReady(async () => {
     updateFilterSummary();
   }
 
+  function highlightSelectedState() {
+    getMapPaths().forEach((path) => {
+      path.classList.toggle('is-active', Boolean(selectedState) && path.dataset.state === selectedState);
+    });
+  }
+
   function selectState(stateCode) {
     if (!stateCode) return;
     if (pageContext.isStatePage && pageContext.lockedState) {
       selectedState = pageContext.lockedState;
       renderListings();
+      highlightSelectedState();
       return;
     }
 
     selectedState = stateCode.toUpperCase();
     closePinDetail();
-    mapView.hidden = true;
+    mapView.hidden = false;
     listingsView.hidden = false;
 
     const name = getStateName(selectedState);
     if (browseTitle) browseTitle.textContent = name;
     if (browseSubtitle) browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
+    if (backBtn && !pageContext.isStatePage) backBtn.textContent = '← All states';
 
     searchInput.value = '';
+    highlightSelectedState();
     renderListings();
     history.replaceState(null, '', `#${selectedState}`);
+    if (mapSvg) mapZoom?.zoomToState?.(mapSvg, selectedState);
     listingsView.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -499,12 +509,15 @@ runWhenReady(async () => {
     closePinDetail();
     listingsView.hidden = true;
     mapView.hidden = false;
+    highlightSelectedState();
     if (browseTitle) browseTitle.textContent = 'Find a pilot car';
     if (browseSubtitle) browseSubtitle.textContent = '';
+    if (backBtn) backBtn.textContent = '← Back to map';
     history.replaceState(null, '', browseBasePath());
     mapZoom?.reset?.();
     void updateMapPins();
     updateMapLegend();
+    mapView.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderListings() {

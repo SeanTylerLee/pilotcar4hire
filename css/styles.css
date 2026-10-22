@@ -1891,6 +1891,19 @@ button { font-family: inherit; }
   fill: #8fa3bc;
 }
 
+.us-map .state.is-active,
+.us-map .state.has-listings.is-active,
+.us-map .state.has-filtered-listings.is-active {
+  fill: var(--success);
+}
+
+.us-map .state.is-active:hover,
+.us-map .state.is-active:focus-visible,
+.us-map .state.has-listings.is-active:hover,
+.us-map .state.has-listings.is-active:focus-visible {
+  fill: var(--success-light);
+}
+
 .map-tooltip {
   position: absolute;
   z-index: 10;
