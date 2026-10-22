@@ -39,7 +39,7 @@
     var total = max == null ? 5 : max;
     var html = "";
     for (var i = 1; i <= total; i += 1) {
-      html += i <= n ? "★" : "☆";
+      html += '<span class="' + (i <= n ? "is-on" : "is-off") + '">★</span>';
     }
     return html;
   }
@@ -115,16 +115,28 @@
     return data;
   }
 
+  function formatAverage(avg) {
+    return (Math.round(Number(avg) * 10) / 10).toFixed(1);
+  }
+
   function summaryHtml(rows) {
-    if (!rows.length) return "";
+    if (!rows.length) {
+      return (
+        '<div class="listing-review-summary listing-review-summary--empty" aria-label="Add review">' +
+          '<span class="listing-review-add">Add review</span>' +
+        "</div>"
+      );
+    }
     var avg = averageStars(rows);
-    var count = rows.length;
-    var label = count === 1 ? "1 review" : count + " reviews";
+    var avgLabel = formatAverage(avg);
+    var see = rows.length === 1 ? "See review" : "See reviews";
     return (
-      '<div class="listing-review-summary" aria-label="' + escapeHtml(avg + " out of 5 stars from " + label) + '">' +
-        '<span class="listing-stars" aria-hidden="true">' + starGlyphs(Math.round(avg)) + "</span>" +
-        '<span class="listing-review-avg">' + escapeHtml(String(avg)) + "</span>" +
-        '<span class="listing-review-count">(' + escapeHtml(label) + ")</span>" +
+      '<div class="listing-review-summary" aria-label="' + escapeHtml(avgLabel + " rating. " + see) + '">' +
+        '<div class="listing-review-badge-row">' +
+          '<span class="listing-stars" aria-hidden="true">' + starGlyphs(avg) + "</span>" +
+          '<span class="listing-review-avg">' + escapeHtml(avgLabel) + "</span>" +
+        "</div>" +
+        '<span class="listing-review-see">' + escapeHtml(see) + "</span>" +
       "</div>"
     );
   }
@@ -147,7 +159,10 @@
         "</li>"
       );
     }).join("");
-    return '<ul class="listing-review-list">' + items + "</ul>";
+    return (
+      '<p class="listing-reviews-heading">Reviews</p>' +
+      '<ul class="listing-review-list">' + items + "</ul>"
+    );
   }
 
   function formHtml(listing) {
@@ -167,7 +182,7 @@
           "</div>" +
         "</fieldset>" +
         '<label class="listing-review-comment-label">' +
-          "<span>Comment <em>(optional)</em></span>" +
+          "<span>Comment (optional)</span>" +
           '<textarea name="comment" maxlength="' + COMMENT_MAX + '" rows="3" placeholder="A short note about this escort"></textarea>' +
         "</label>" +
         '<p class="listing-review-count-hint"><span data-el="chars">0</span>/' + COMMENT_MAX + "</p>" +
@@ -264,11 +279,11 @@
     card.appendChild(wrap);
     if (allowWrite) bindForm(wrap, listing);
 
-    var head = card.querySelector(".listing-card-head");
-    if (head && rows.length) {
-      var existingSummary = head.querySelector(".listing-review-summary");
+    var titleRow = card.querySelector(".listing-card-title-row") || card.querySelector(".listing-card-head");
+    if (titleRow && (rows.length || allowWrite)) {
+      var existingSummary = card.querySelector(".listing-review-summary");
       if (existingSummary) existingSummary.remove();
-      head.insertAdjacentHTML("beforeend", summaryHtml(rows));
+      titleRow.insertAdjacentHTML("beforeend", summaryHtml(rows));
     }
   }
 

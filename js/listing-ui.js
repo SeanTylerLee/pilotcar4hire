@@ -26,7 +26,9 @@ function listingCardHtml(listing, { showContact = true } = {}) {
 
   return `
     <div class="listing-card-head">
-      <h2 class="listing-name">${escapeHtml(data.businessName)}</h2>
+      <div class="listing-card-title-row">
+        <h2 class="listing-name">${escapeHtml(data.businessName)}</h2>
+      </div>
       <div class="badges">${badges}</div>
     </div>
     <dl class="listing-details">
