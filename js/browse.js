@@ -181,12 +181,8 @@ runWhenReady(async () => {
       onPinLeave: hideTooltip,
       onPinActivate: (event, listing, pinEl) => {
         event.stopPropagation();
-        const coords = pinEl?.dataset?.pinX != null
-          ? { x: Number(pinEl.dataset.pinX), y: Number(pinEl.dataset.pinY) }
-          : null;
-        if (coords && mapZoom?.zoomToPoint) {
-          mapZoom.zoomToPoint(coords.x, coords.y, 42);
-        }
+        const data = normalizeListing(listing);
+        if (data.homeState) selectState(data.homeState);
         showPinDetail(listing, pinEl);
       },
       onClusterActivate: (event, entries, pinEl) => {
@@ -279,17 +275,43 @@ runWhenReady(async () => {
     });
   }
 
+  function stateCodeFromNode(node) {
+    let current = node;
+    while (current && current !== mapContainer) {
+      const code = current.getAttribute && (current.getAttribute('data-state') || current.dataset?.state);
+      if (code) return String(code).toUpperCase();
+      if (current.id && /^state-[A-Z]{2}$/i.test(current.id)) {
+        return current.id.slice(6).toUpperCase();
+      }
+      current = current.parentNode;
+    }
+    return '';
+  }
+
+  function stateCodeFromPoint(x, y) {
+    const stack = (typeof document.elementsFromPoint === 'function'
+      ? document.elementsFromPoint(x, y)
+      : [document.elementFromPoint(x, y)].filter(Boolean)) || [];
+    for (let i = 0; i < stack.length; i += 1) {
+      const node = stack[i];
+      if (!node) continue;
+      if (node.closest && node.closest('.map-zoom-controls')) continue;
+      const code = stateCodeFromNode(node);
+      if (code) return code;
+    }
+    return '';
+  }
+
   function bindMapPaths() {
     getMapPaths().forEach((path) => {
       path.setAttribute('role', 'button');
       path.setAttribute('tabindex', '0');
       path.style.cursor = 'pointer';
       path.addEventListener('click', (event) => {
-        if (mapZoom?.wasDragged?.()) return;
+        event.preventDefault();
         event.stopPropagation();
         closePinDetail();
         if (pageContext.isStatePage && pageContext.lockedState) {
-          mapZoom?.zoomToState?.(mapSvg, pageContext.lockedState);
           listingsView?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           return;
         }
@@ -300,7 +322,6 @@ runWhenReady(async () => {
           e.preventDefault();
           closePinDetail();
           if (pageContext.isStatePage && pageContext.lockedState) {
-            mapZoom?.zoomToState?.(mapSvg, pageContext.lockedState);
             return;
           }
           selectState(path.dataset.state);
@@ -342,21 +363,8 @@ runWhenReady(async () => {
         svg: mapSvg,
         onTransform: () => refreshPinsFromZoom(),
         onTap: (x, y) => {
-          const stack = (typeof document.elementsFromPoint === 'function'
-            ? document.elementsFromPoint(x, y)
-            : [document.elementFromPoint(x, y)].filter(Boolean)) || [];
-          for (let i = 0; i < stack.length; i += 1) {
-            const node = stack[i];
-            if (!node) continue;
-            if (node.closest && node.closest('.map-pin, .map-zoom-controls, button, a')) return;
-            const path = (node.classList && node.classList.contains('state'))
-              ? node
-              : (node.closest ? node.closest('.state') : null);
-            if (path && path.dataset && path.dataset.state) {
-              selectState(path.dataset.state);
-              return;
-            }
-          }
+          const code = stateCodeFromPoint(x, y);
+          if (code) selectState(code);
         },
       });
     }
@@ -500,19 +508,21 @@ runWhenReady(async () => {
 
     selectedState = stateCode.toUpperCase();
     closePinDetail();
-    mapView.hidden = false;
-    listingsView.hidden = false;
+    if (mapView) mapView.hidden = false;
+    if (listingsView) {
+      listingsView.hidden = false;
+      listingsView.removeAttribute('hidden');
+    }
 
     const name = getStateName(selectedState);
     if (browseTitle) browseTitle.textContent = name;
-    if (browseSubtitle) browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
+    if (browseSubtitle) browseSubtitle.textContent = `Pilot cars listed in ${name}. Contact them directly.`;
     if (backBtn && !pageContext.isStatePage) backBtn.textContent = '← All states';
 
     searchInput.value = '';
     highlightSelectedState();
     renderListings();
     history.replaceState(null, '', `#${selectedState}`);
-    if (mapSvg) mapZoom?.zoomToState?.(mapSvg, selectedState);
     listingsView.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
