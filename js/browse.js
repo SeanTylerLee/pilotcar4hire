@@ -516,7 +516,7 @@ runWhenReady(async () => {
 
     const name = getStateName(selectedState);
     if (browseTitle) browseTitle.textContent = name;
-    if (browseSubtitle) browseSubtitle.textContent = `Pilot cars listed in ${name}. Contact them directly.`;
+    if (browseSubtitle) browseSubtitle.textContent = `Pilot cars based in ${name}. Contact them directly.`;
     if (backBtn && !pageContext.isStatePage) backBtn.textContent = '← All states';
 
     searchInput.value = '';
