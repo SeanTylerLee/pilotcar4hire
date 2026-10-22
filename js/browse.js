@@ -341,6 +341,23 @@ runWhenReady(async () => {
         container: mapStage,
         svg: mapSvg,
         onTransform: () => refreshPinsFromZoom(),
+        onTap: (x, y) => {
+          const stack = (typeof document.elementsFromPoint === 'function'
+            ? document.elementsFromPoint(x, y)
+            : [document.elementFromPoint(x, y)].filter(Boolean)) || [];
+          for (let i = 0; i < stack.length; i += 1) {
+            const node = stack[i];
+            if (!node) continue;
+            if (node.closest && node.closest('.map-pin, .map-zoom-controls, button, a')) return;
+            const path = (node.classList && node.classList.contains('state'))
+              ? node
+              : (node.closest ? node.closest('.state') : null);
+            if (path && path.dataset && path.dataset.state) {
+              selectState(path.dataset.state);
+              return;
+            }
+          }
+        },
       });
     }
 

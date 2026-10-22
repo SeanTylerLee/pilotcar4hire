@@ -1,4 +1,4 @@
-const CACHE = 'pc4h-shell-v8';
+const CACHE = 'pc4h-shell-v9';
 const SHELL = [
   '/',
   '/index.html',

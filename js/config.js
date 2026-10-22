@@ -1,5 +1,5 @@
 // Bump when shipping frontend changes (shown in footer).
-window.SITE_VERSION = 'v70';
+window.SITE_VERSION = 'v71';
 
 // Public contact email (footer, reports, schema.org).
 window.SITE_CONTACT_EMAIL = 'team@pilotcar4hire.com';

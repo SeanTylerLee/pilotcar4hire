@@ -1,4 +1,4 @@
-function initMapZoom({ container, svg, onTransform }) {
+function initMapZoom({ container, svg, onTransform, onTap }) {
   if (!container || !svg) return null;
 
   const base = { x: 0, y: 0, w: 960, h: 600 };
@@ -113,8 +113,6 @@ function initMapZoom({ container, svg, onTransform }) {
     dragging = true;
     dragMoved = false;
     dragStart = { x: event.clientX, y: event.clientY, vx: viewBox.x, vy: viewBox.y };
-    container.setPointerCapture(event.pointerId);
-    container.classList.add('is-dragging');
   }
 
   function onPointerMove(event) {
@@ -127,7 +125,16 @@ function initMapZoom({ container, svg, onTransform }) {
     const dxPx = event.clientX - dragStart.x;
     const dyPx = event.clientY - dragStart.y;
 
-    if (Math.abs(dxPx) > 4 || Math.abs(dyPx) > 4) dragMoved = true;
+    if (!dragMoved && (Math.abs(dxPx) > 4 || Math.abs(dyPx) > 4)) {
+      dragMoved = true;
+      try {
+        container.setPointerCapture(event.pointerId);
+      } catch {
+        /* ignore */
+      }
+      container.classList.add('is-dragging');
+    }
+    if (!dragMoved) return;
 
     const dx = (dxPx / rect.width) * viewBox.w;
     const dy = (dyPx / rect.height) * viewBox.h;
@@ -140,6 +147,8 @@ function initMapZoom({ container, svg, onTransform }) {
   function endDrag(event) {
     if (!dragging) return;
     const moved = dragMoved;
+    const tapX = event.clientX;
+    const tapY = event.clientY;
     dragging = false;
     dragStart = null;
     container.classList.remove('is-dragging');
@@ -147,6 +156,9 @@ function initMapZoom({ container, svg, onTransform }) {
       container.releasePointerCapture(event.pointerId);
     } catch {
       /* ignore */
+    }
+    if (!moved && typeof onTap === 'function') {
+      onTap(tapX, tapY);
     }
     window.setTimeout(() => {
       dragMoved = false;

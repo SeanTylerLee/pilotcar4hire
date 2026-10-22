@@ -73,5 +73,6 @@ function listingMatchesState(listing, stateCode) {
   if (!stateCode) return true;
   const code = stateCode.toUpperCase();
   const normalized = normalizeListing(listing);
-  return normalized.homeState?.toUpperCase() === code;
+  if (normalized.homeState?.toUpperCase() === code) return true;
+  return (normalized.statesCertified || []).some((item) => String(item || '').toUpperCase() === code);
 }
